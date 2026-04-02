@@ -7,6 +7,8 @@ from agent.setup_routes import router as setup_router
 from agent.auth_middleware import router as login_router, is_authenticated
 from dotenv import load_dotenv
 import traceback, os
+from agent.database import get_client_by_phone
+from starlette.middleware.sessions import SessionMiddleware
 
 load_dotenv()
 
@@ -73,7 +75,11 @@ async def whatsapp_webhook(request: Request):
         sender_phone = message["from"]
 
         print(f"[Webhook] Message from {sender_phone}: {user_message}")
-        await run_agent(user_message, sender_phone)
+        client = get_client_by_phone(sender_phone)
+        if not client:                           # ✅ 8 spaces
+            print(f"[Webhook] Unknown phone: {sender_phone}")  # ✅ 12 spaces
+            return {"status": "unknown_client"}  # ✅ 12 spaces
+        await run_agent(user_message, sender_phone, client)    # ✅ 8 spaces
         print(f"[Webhook] Agent finished for {sender_phone}")
 
     except Exception as e:
@@ -81,3 +87,8 @@ async def whatsapp_webhook(request: Request):
         return {"status": "error", "detail": str(e)}
 
     return {"status": "ok"}
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SESSION_SECRET", "change-this-secret")
+)

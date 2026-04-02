@@ -80,7 +80,7 @@ Expense rules:
 - If balance drops to 5000 or below, AUTOMATICALLY send a low balance alert email.
 """
 
-async def run_agent(user_message: str, phone: str):
+async def run_agent(user_message: str, phone: str, client_data: dict):
     history = get_memory(phone)
     history.append({"role": "user", "content": user_message})
 
@@ -100,7 +100,7 @@ async def run_agent(user_message: str, phone: str):
         for tool_call in reply_message.tool_calls:
             fn_name = tool_call.function.name
             args    = json.loads(tool_call.function.arguments)
-            result  = await execute_tool(fn_name, args)
+            result = await execute_tool(fn_name, args, client_data)
             tool_results.append({
                 "tool_call_id": tool_call.id,
                 "role":         "tool",
@@ -141,20 +141,21 @@ async def run_agent(user_message: str, phone: str):
     save_memory(phone, history)
 
 
-async def execute_tool(name: str, args: dict):
+async def execute_tool(name: str, args: dict, client_data: dict):
     if name == "send_email":
-        return await send_email(**args)
+        return await send_email(client_data=client_data, **args)
 
     elif name == "log_expense":
-        result = await log_expense(**args)
+        result = await log_expense(client_data=client_data, **args)
         if args["balance"] <= 5000:
-            alert_email = os.getenv("ALERT_EMAIL", "you@gmail.com")
+            alert_email = client_data.get("alert_email", os.getenv("ALERT_EMAIL", "you@gmail.com"))
             await send_email(
                 to=alert_email,
                 subject="Low Balance Alert",
-                body=f"Your balance has dropped to Rs.{args['balance']}. Please add funds."
+                body=f"Your balance has dropped to Rs.{args['balance']}. Please add funds.",
+                client_data=client_data
             )
         return result
 
     elif name == "create_calendar_event":
-        return await create_event(**args)
+        return await create_event(client_data=client_data, **args)

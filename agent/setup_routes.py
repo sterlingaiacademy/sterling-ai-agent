@@ -1,4 +1,5 @@
 # agent/setup_routes.py
+from agent.database import update_client
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel
@@ -75,3 +76,19 @@ async def save_whatsapp_config(config: WhatsAppConfig):
 
     except Exception as e:
         return {"status": "error", "detail": str(e)}, 500
+    
+    
+@router.post("/setup/save")
+async def save_setup(request: Request):
+    client_id = request.session.get("client_id")
+    form = await request.form()
+    
+    update_client(client_id, {
+        "wa_phone": form.get("wa_phone"),
+        "wa_token": form.get("wa_token"),
+        "wa_phone_number_id": form.get("wa_phone_number_id"),
+        "google_sheet_id": form.get("google_sheet_id"),
+        "alert_email": form.get("alert_email"),
+        "timezone": form.get("timezone", "Asia/Kolkata"),
+    })
+    return RedirectResponse("/setup?saved=true", status_code=302)
