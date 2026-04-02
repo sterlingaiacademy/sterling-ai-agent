@@ -1,9 +1,9 @@
 import os, json
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, JSONResponse
-from google_auth_oauthlib.flow import Flow
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request as GoogleRequest
+from requests_oauthlib import OAuth2Session
 from agent.database import save_google_token, get_client_by_email
 
 router = APIRouter()
@@ -14,13 +14,16 @@ SCOPES = [
     'https://www.googleapis.com/auth/calendar',
 ]
 
-def build_flow():
-    client_config = json.loads(os.getenv("GOOGLE_CREDENTIALS_JSON"))
-    return Flow.from_client_config(
-        client_config,
-        scopes=SCOPES,
-        redirect_uri=os.getenv("GOOGLE_REDIRECT_URI")
-    )
+AUTHORIZATION_BASE_URL = "https://accounts.google.com/o/oauth2/auth"
+TOKEN_URL = "https://oauth2.googleapis.com/token"
+
+def get_client_secrets():
+    config = json.loads(os.getenv("GOOGLE_CREDENTIALS_JSON"))
+    web = config.get("web", config)
+    return web["client_id"], web["client_secret"]
+
+def get_redirect_uri():
+    return os.getenv("GOOGLE_REDIRECT_URI")
 
 @router.get("/auth/google")
 async def start_google_auth(request: Request):
@@ -28,11 +31,16 @@ async def start_google_auth(request: Request):
     if not client_email:
         return RedirectResponse("/login")
 
-    flow = build_flow()
-    auth_url, state = flow.authorization_url(
-        access_type='offline',
-        include_granted_scopes='true',
-        prompt='consent'
+    client_id, _ = get_client_secrets()
+    oauth = OAuth2Session(
+        client_id=client_id,
+        redirect_uri=get_redirect_uri(),
+        scope=SCOPES
+    )
+    auth_url, state = oauth.authorization_url(
+        AUTHORIZATION_BASE_URL,
+        access_type="offline",
+        prompt="consent"
     )
     request.session["oauth_state"] = state
     return RedirectResponse(auth_url)
@@ -43,25 +51,39 @@ async def google_callback(request: Request):
     if not client_email:
         return RedirectResponse("/login")
 
-    flow = build_flow()
+    client_id, client_secret = get_client_secrets()
+    state = request.session.get("oauth_state", "")
 
-    # ✅ Fix: set state so flow doesn't require code verifier
-    flow.oauth2session._state = request.session.get("oauth_state", "")
-
-    # ✅ Fix: use http if needed, but force https for token exchange
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
-    flow.fetch_token(
-        authorization_response=str(request.url),
-        # ✅ Fix: disable PKCE code verifier check
-        code_verifier=None
+    oauth = OAuth2Session(
+        client_id=client_id,
+        redirect_uri=get_redirect_uri(),
+        state=state,
+        scope=SCOPES
     )
 
-    creds = flow.credentials
-    token_json = creds.to_json()
+    # Force https in the callback URL since Render uses https
+    callback_url = str(request.url).replace("http://", "https://")
+
+    token = oauth.fetch_token(
+        TOKEN_URL,
+        authorization_response=callback_url,
+        client_secret=client_secret
+    )
+
+    # Build credentials object and save to DB
+    creds = Credentials(
+        token=token["access_token"],
+        refresh_token=token.get("refresh_token"),
+        token_uri=TOKEN_URL,
+        client_id=client_id,
+        client_secret=client_secret,
+        scopes=SCOPES
+    )
 
     client = get_client_by_email(client_email)
-    save_google_token(client["id"], token_json)
+    save_google_token(client["id"], creds.to_json())
 
     return RedirectResponse("/setup?google=connected")
 
