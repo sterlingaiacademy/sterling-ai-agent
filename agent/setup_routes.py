@@ -15,6 +15,7 @@ class WhatsAppConfig(BaseModel):
     wa_verify_token: str
     sheet_id:        str
     alert_email:     str
+    wa_phone:        str
 
 
 # ── Serve setup page ──────────────────────────────────────────────────────────
@@ -90,6 +91,7 @@ async def save_whatsapp_config(config: WhatsAppConfig, request: Request):
             "wa_verify_token":    config.wa_verify_token,
             "google_sheet_id":    config.sheet_id,
             "alert_email":        config.alert_email,
+            "wa_phone":           config.wa_phone,
         })
 
         return JSONResponse({"status": "ok", "message": "Configuration saved successfully."})
@@ -99,3 +101,5 @@ async def save_whatsapp_config(config: WhatsAppConfig, request: Request):
             {"status": "error", "detail": str(e)},
             status_code=500
         )
+        
+    

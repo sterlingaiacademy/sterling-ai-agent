@@ -619,6 +619,22 @@ body{
         </div>
       </div>
 
+      <div class="field-card">
+  <div class="fc-top">
+    <div class="fc-label">Your WhatsApp Phone Number</div>
+    <div class="fc-badge required">Required</div>
+  </div>
+  <input class="fc-input" type="text" id="wa_phone" placeholder="e.g. 919876543210 (with country code, no +)"/>
+  <div class="fc-divider"></div>
+  <div class="fc-guide">
+    <div class="fc-guide-icon">📱</div>
+    <div class="fc-guide-text">
+      Enter your WhatsApp number with country code but <strong>without the + sign</strong>. 
+      Example: India number +91 98765 43210 → enter <strong>919876543210</strong>
+    </div>
+  </div>
+</div>
+
       <div class="section-group">
         <div class="sg-title">Google Services</div>
 
@@ -888,6 +904,7 @@ function getFields(){
     wa_verify_token: document.getElementById('wa_verify_token').value.trim(),
     sheet_id:        document.getElementById('sheet_id').value.trim(),
     alert_email:     document.getElementById('alert_email').value.trim(),
+     wa_phone:        document.getElementById('wa_phone').value.trim(),
   };
 }
 
