@@ -1,20 +1,30 @@
-from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build
-from dotenv import load_dotenv
-import os
+import requests, os
 
-load_dotenv()
+async def send_whatsapp_message(phone: str, message: str, client_data: dict = None):
+    if client_data:
+        token    = client_data.get("wa_token") or os.getenv("WA_TOKEN")
+        phone_id = client_data.get("wa_phone_number_id") or os.getenv("WA_PHONE_NUMBER_ID")
+    else:
+        token    = os.getenv("WA_TOKEN")
+        phone_id = os.getenv("WA_PHONE_NUMBER_ID")
 
-async def log_expense(credit_debit, purpose, amount, balance):
-    sheet_id = os.getenv("GOOGLE_SHEET_ID")
-    creds    = Credentials.from_authorized_user_file("token.json")
-    service  = build("sheets", "v4", credentials=creds)
+    if not token or not phone_id:
+        print("[WhatsApp] ERROR: No token or phone_id found!")
+        return {"error": "missing credentials"}
 
-    values = [[credit_debit, purpose, amount, balance]]
-    service.spreadsheets().values().append(
-        spreadsheetId=sheet_id,
-        range="Sheet1",
-        valueInputOption="RAW",
-        body={"values": values}
-    ).execute()
-    return "Expense logged"
+    url = f"https://graph.facebook.com/v18.0/{phone_id}/messages"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type":  "application/json",
+    }
+    payload = {
+        "messaging_product": "whatsapp",
+        "to":   phone,
+        "type": "text",
+        "text": {"body": message},
+    }
+    response = requests.post(url, json=payload, headers=headers)
+    result   = response.json()
+    print(f"[WhatsApp] Reply to {phone}: {message[:60]}...")
+    print(f"[WhatsApp] API response: {result}")
+    return result
