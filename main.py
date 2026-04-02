@@ -13,6 +13,12 @@ from starlette.middleware.sessions import SessionMiddleware
 load_dotenv()
 
 app = FastAPI(title="Sterling AI Assistant")
+from starlette.middleware.sessions import SessionMiddleware
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SESSION_SECRET", "sterling-secret-change-this")
+)
 
 # ── Routers ────────────────────────────────────────────────────────────────────
 app.include_router(login_router)   # /login  /logout

@@ -8,32 +8,152 @@ router = APIRouter()
 def is_authenticated(request: Request) -> bool:
     return bool(request.session.get("client_email"))
 
+# ── Login page (GET) ──────────────────────────────────────────────────────────
+@router.get("/login")
+async def login_page():
+    return HTMLResponse("""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sterling AI · Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f1ec;--card:#ffffff;--border:#d4cec4;--text:#1a1714;
+  --muted:#6b6358;--accent:#1a3a2a;--accent3:#2d5a3d;--accent-l:#e8f0eb;
+  --err:#7a1f1f;--err-l:#fdf0f0;
+}
+body{background:var(--bg);font-family:'Plus Jakarta Sans',sans-serif;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:48px 40px;width:100%;max-width:420px;
+  box-shadow:0 2px 8px rgba(26,23,20,.06),0 12px 40px rgba(26,23,20,.08);}
+.logo{width:44px;height:44px;background:var(--accent);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  color:white;font-size:18px;font-weight:700;margin:0 auto 20px;}
+h1{font-family:'Playfair Display',serif;font-size:28px;text-align:center;
+  color:var(--text);margin-bottom:6px;}
+.sub{text-align:center;color:var(--muted);font-size:13.5px;margin-bottom:32px;}
+.tabs{display:flex;background:#f4f1ec;border-radius:8px;padding:4px;margin-bottom:28px;}
+.tab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:600;
+  border-radius:6px;cursor:pointer;color:var(--muted);border:none;background:none;transition:all .2s;}
+.tab.active{background:var(--card);color:var(--accent);
+  box-shadow:0 1px 4px rgba(26,23,20,.1);}
+.form-group{margin-bottom:16px;}
+label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:1px;color:var(--accent);margin-bottom:6px;}
+input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--text);
+  background:var(--bg);outline:none;transition:border-color .2s;}
+input:focus{border-color:var(--accent);background:white;}
+.btn{width:100%;padding:13px;background:var(--accent);color:white;border:none;
+  border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;transition:all .2s;}
+.btn:hover{background:#0f2a1c;}
+.error{background:var(--err-l);border:1px solid rgba(122,31,31,.2);color:var(--err);
+  padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none;}
+.panel{display:none;} .panel.active{display:block;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">S</div>
+  <h1>Sterling AI</h1>
+  <p class="sub">Your intelligent WhatsApp assistant</p>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('login')">Sign In</button>
+    <button class="tab" onclick="switchTab('register')">Create Account</button>
+  </div>
+
+  <div id="err" class="error"></div>
+
+  <!-- Login -->
+  <div class="panel active" id="panel-login">
+    <form method="POST" action="/login">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="you@example.com" required/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="••••••••" required/>
+      </div>
+      <button class="btn" type="submit">Sign In →</button>
+    </form>
+  </div>
+
+  <!-- Register -->
+  <div class="panel" id="panel-register">
+    <form method="POST" action="/register">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="you@example.com" required/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Choose a strong password" required/>
+      </div>
+      <button class="btn" type="submit">Create Account →</button>
+    </form>
+  </div>
+</div>
+<script>
+  function switchTab(t){
+    document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));
+    document.getElementById('panel-'+t).classList.add('active');
+    event.target.classList.add('active');
+  }
+  // Show error from URL param
+  const err = new URLSearchParams(window.location.search).get('error');
+  if(err){ const el=document.getElementById('err'); el.textContent=err; el.style.display='block'; }
+</script>
+</body>
+</html>
+""")
+
+# ── Login POST ────────────────────────────────────────────────────────────────
 @router.post("/login")
 async def login(request: Request):
     form = await request.form()
     email = form.get("email")
     password = form.get("password")
-    
+
     client = get_client_by_email(email)
     if not client:
-        return HTMLResponse("Invalid email or password", status_code=401)
-    
+        return RedirectResponse("/login?error=Invalid+email+or+password", status_code=302)
+
     if not bcrypt.checkpw(password.encode(), client["password_hash"].encode()):
-        return HTMLResponse("Invalid email or password", status_code=401)
-    
+        return RedirectResponse("/login?error=Invalid+email+or+password", status_code=302)
+
     request.session["client_email"] = email
     request.session["client_id"] = client["id"]
     return RedirectResponse("/setup", status_code=302)
 
+# ── Register POST ─────────────────────────────────────────────────────────────
 @router.post("/register")
 async def register(request: Request):
     form = await request.form()
     email = form.get("email")
     password = form.get("password")
-    
+
+    existing = get_client_by_email(email)
+    if existing:
+        return RedirectResponse("/login?error=Account+already+exists,+please+sign+in", status_code=302)
+
     hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
     client = create_client_account(email, hashed)
-    
+
     request.session["client_email"] = email
     request.session["client_id"] = client["id"]
     return RedirectResponse("/setup", status_code=302)
+
+# ── Logout ────────────────────────────────────────────────────────────────────
+@router.get("/logout")
+async def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse("/login", status_code=302)
