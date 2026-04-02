@@ -1,5 +1,12 @@
+from fastapi import APIRouter, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
 import bcrypt
 from agent.database import get_client_by_email, create_client_account
+
+router = APIRouter()
+
+def is_authenticated(request: Request) -> bool:
+    return bool(request.session.get("client_email"))
 
 @router.post("/login")
 async def login(request: Request):
