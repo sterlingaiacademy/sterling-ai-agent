@@ -1,4 +1,5 @@
 import os
+from unittest import result
 from supabase import create_client
 
 supabase = create_client(
@@ -7,12 +8,12 @@ supabase = create_client(
 )
 
 def get_client_by_phone(wa_phone: str):
-    result = supabase.table("clients").select("*").eq("wa_phone", wa_phone).single().execute()
-    return result.data
+    result = supabase.table("clients").select("*").eq("wa_phone", wa_phone).execute()
+    return result.data[0] if result.data else None
 
 def get_client_by_email(email: str):
-    result = supabase.table("clients").select("*").eq("email", email).single().execute()
-    return result.data
+   result = supabase.table("clients").select("*").eq("email", email).execute()
+   return result.data[0] if result.data else None
 
 def save_google_token(client_id: str, token_json: str):
     supabase.table("clients").update({
