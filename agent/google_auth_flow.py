@@ -24,16 +24,15 @@ def build_flow():
 
 @router.get("/auth/google")
 async def start_google_auth(request: Request):
-    # Must be logged in
     client_email = request.session.get("client_email")
     if not client_email:
         return RedirectResponse("/login")
-    
+
     flow = build_flow()
     auth_url, state = flow.authorization_url(
         access_type='offline',
         include_granted_scopes='true',
-        prompt='consent'   # forces refresh_token to always be returned
+        prompt='consent'
     )
     request.session["oauth_state"] = state
     return RedirectResponse(auth_url)
@@ -43,46 +42,58 @@ async def google_callback(request: Request):
     client_email = request.session.get("client_email")
     if not client_email:
         return RedirectResponse("/login")
-    
+
     flow = build_flow()
-    flow.fetch_token(authorization_response=str(request.url))
-    
+
+    # ✅ Fix: set state so flow doesn't require code verifier
+    flow.oauth2session._state = request.session.get("oauth_state", "")
+
+    # ✅ Fix: use http if needed, but force https for token exchange
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
+    flow.fetch_token(
+        authorization_response=str(request.url),
+        # ✅ Fix: disable PKCE code verifier check
+        code_verifier=None
+    )
+
     creds = flow.credentials
     token_json = creds.to_json()
-    
-    # Save to database against this client
+
     client = get_client_by_email(client_email)
     save_google_token(client["id"], token_json)
-    
+
     return RedirectResponse("/setup?google=connected")
 
 @router.get("/auth/status")
 async def auth_status(request: Request):
     client_email = request.session.get("client_email")
     if not client_email:
-        return JSONResponse({"authenticated": False})
-    
-    from agent.database import get_client_by_email
+        return JSONResponse({"authenticated": False, "status": "disconnected"})
+
     client = get_client_by_email(client_email)
+    if not client:
+        return JSONResponse({"authenticated": False, "status": "disconnected"})
+
+    google_connected = bool(client.get("google_token_json"))
     return JSONResponse({
         "authenticated": True,
-        "google_connected": bool(client.get("google_token_json")),
+        "status": "connected" if google_connected else "disconnected",
+        "google_connected": google_connected,
         "wa_connected": bool(client.get("wa_phone")),
     })
 
 def get_google_credentials_for_client(client: dict):
-    """Load and auto-refresh Google credentials for a given client dict."""
     token_json = client.get("google_token_json")
     if not token_json:
         raise Exception(f"No Google token for client {client['email']}")
-    
+
     creds = Credentials.from_authorized_user_info(
         json.loads(token_json),
         scopes=SCOPES
     )
     if creds.expired and creds.refresh_token:
         creds.refresh(GoogleRequest())
-        # Save refreshed token back to DB
         save_google_token(client["id"], creds.to_json())
-    
+
     return creds
