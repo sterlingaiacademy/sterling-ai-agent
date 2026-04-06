@@ -133,8 +133,8 @@ async def run_agent(user_message: str, phone: str, client_data: dict):
     else:
         final_text = reply_message.content
 
-    # Send WhatsApp reply
-    await send_whatsapp_message(phone, final_text)
+    # Send WhatsApp reply using per-user credentials from Supabase
+    await send_whatsapp_message(phone, final_text, client_data=client_data)
 
     # Save memory (only serializable dicts)
     history.append({"role": "assistant", "content": final_text})

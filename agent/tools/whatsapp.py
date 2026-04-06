@@ -3,10 +3,21 @@ import requests
 import os
 
 
-async def send_whatsapp_message(phone: str, message: str):
-    """Send a WhatsApp text message back to the user."""
-    token    = os.getenv("WA_TOKEN")
-    phone_id = os.getenv("WA_PHONE_NUMBER_ID")
+async def send_whatsapp_message(phone: str, message: str, client_data: dict = None):
+    """Send a WhatsApp text message back to the user.
+    Uses per-user credentials from client_data (Supabase), falls back to env vars.
+    """
+    # Use per-user credentials stored in Supabase, fall back to env vars
+    token    = (client_data or {}).get("wa_token") or os.getenv("WA_TOKEN")
+    phone_id = (client_data or {}).get("wa_phone_number_id") or os.getenv("WA_PHONE_NUMBER_ID")
+
+    if not token:
+        print(f"[WhatsApp] ERROR: No WA_TOKEN found for {phone}")
+        return {"error": "missing_token"}
+
+    if not phone_id:
+        print(f"[WhatsApp] ERROR: No WA_PHONE_NUMBER_ID found for {phone}")
+        return {"error": "missing_phone_id"}
 
     url = f"https://graph.facebook.com/v18.0/{phone_id}/messages"
 
