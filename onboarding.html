@@ -575,15 +575,15 @@ body{
 
         <div class="field-card">
           <div class="fc-top">
-            <div class="fc-label">Access Token</div>
+            <div class="fc-label">Permanent Access Token</div>
             <div class="fc-badge required">Required</div>
           </div>
-          <input class="fc-input" type="password" id="wa_token" placeholder="EAAxxxxxxxxxxxxxxxxxx — paste your token here"/>
+          <input class="fc-input" type="password" id="wa_token" placeholder="EAAxxxxxxxxxxxxxxxxxx — paste your permanent token here"/>
           <div class="fc-divider"></div>
           <div class="fc-guide">
-            <div class="fc-guide-icon">📋</div>
+            <div class="fc-guide-icon">🔑</div>
             <div class="fc-guide-text">
-              Go to <a href="https://developers.facebook.com" target="_blank">developers.facebook.com</a> → Your App → <strong>WhatsApp → API Setup</strong> → click <strong>"Generate access token"</strong> → copy the long token that appears. Tokens expire — regenerate if your agent stops responding.
+              This token <strong>never expires</strong>. To get it: go to <a href="https://business.facebook.com/settings" target="_blank">business.facebook.com/settings</a> → <strong>Users → System Users</strong> → Add a System User (role: Admin) → click <strong>"Generate New Token"</strong> → select your App → enable <strong>whatsapp_business_messaging</strong> &amp; <strong>whatsapp_business_management</strong> permissions → click Generate. Copy the token that appears. <a href="#" onclick="showPage('guide');return false;">See full guide →</a>
             </div>
           </div>
         </div>
@@ -748,23 +748,24 @@ body{
 
     <div class="guide-grid">
 
-      <!-- WhatsApp Access Token -->
+      <!-- WhatsApp Permanent Access Token -->
       <div class="guide-card">
         <div class="gc-header">
           <div class="gc-num">1</div>
           <div>
-            <div class="gc-title">WhatsApp Access Token</div>
-            <div class="gc-sub">From Meta Developer Console</div>
+            <div class="gc-title">Permanent Access Token</div>
+            <div class="gc-sub">Via Meta Business Suite — never expires</div>
           </div>
         </div>
         <div class="gc-steps">
-          <div class="gc-step"><div class="gc-step-num">1</div><div class="gc-step-text">Go to <a href="https://developers.facebook.com" target="_blank">developers.facebook.com</a> and log in with your Facebook account</div></div>
-          <div class="gc-step"><div class="gc-step-num">2</div><div class="gc-step-text">Click <strong>My Apps</strong> at the top → select your app (or create one if needed)</div></div>
-          <div class="gc-step"><div class="gc-step-num">3</div><div class="gc-step-text">In the left sidebar, click <strong>WhatsApp</strong> → then click <strong>API Setup</strong></div></div>
-          <div class="gc-step"><div class="gc-step-num">4</div><div class="gc-step-text">Click the blue <strong>"Generate access token"</strong> button → select your WhatsApp Business account</div></div>
-          <div class="gc-step"><div class="gc-step-num">5</div><div class="gc-step-text">Copy the long token that appears in the text box — it starts with <strong>EAA…</strong></div></div>
+          <div class="gc-step"><div class="gc-step-num">1</div><div class="gc-step-text">Go to <a href="https://business.facebook.com/settings" target="_blank">business.facebook.com/settings</a> and log in</div></div>
+          <div class="gc-step"><div class="gc-step-num">2</div><div class="gc-step-text">In the left menu go to <strong>Users → System Users</strong> → click <strong>"Add"</strong> → give it a name (e.g. <em>Sterling Bot</em>) and set role to <strong>Admin</strong></div></div>
+          <div class="gc-step"><div class="gc-step-num">3</div><div class="gc-step-text">Click <strong>"Generate New Token"</strong> → select your WhatsApp App from the dropdown</div></div>
+          <div class="gc-step"><div class="gc-step-num">4</div><div class="gc-step-text">Enable these two permissions: <strong>whatsapp_business_messaging</strong> and <strong>whatsapp_business_management</strong></div></div>
+          <div class="gc-step"><div class="gc-step-num">5</div><div class="gc-step-text">Set <strong>Token Expiration</strong> to <strong>"Never"</strong> → click <strong>Generate Token</strong></div></div>
+          <div class="gc-step"><div class="gc-step-num">6</div><div class="gc-step-text"><strong>Copy the token immediately</strong> — it starts with <strong>EAA…</strong> and is shown only once. Paste it into the Access Token field in Setup Step 2.</div></div>
         </div>
-        <div class="gc-tip">⚠ Tokens expire after ~24 hours in development mode. If your agent stops working, regenerate the token and update it in Setup → Step 2.</div>
+        <div class="gc-tip">✅ This permanent token never expires, so your agent will keep working without any manual refresh. Make sure the System User has access to your WhatsApp Business Account assets.</div>
       </div>
 
       <!-- Phone Number ID -->
@@ -815,11 +816,11 @@ body{
         <div class="gc-steps">
           <div class="gc-step"><div class="gc-step-num">1</div><div class="gc-step-text">In Meta Console → <strong>WhatsApp → Configuration</strong></div></div>
           <div class="gc-step"><div class="gc-step-num">2</div><div class="gc-step-text">Under <strong>Webhook</strong>, click <strong>Edit</strong></div></div>
-          <div class="gc-step"><div class="gc-step-num">3</div><div class="gc-step-text">Set <strong>Callback URL</strong> to: your-server-url<strong>/webhook/whatsapp</strong></div></div>
+          <div class="gc-step"><div class="gc-step-num">3</div><div class="gc-step-text">Set <strong>Callback URL</strong> to: <strong>https://sterling-ai-agent.onrender.com/webhook/whatsapp</strong></div></div>
           <div class="gc-step"><div class="gc-step-num">4</div><div class="gc-step-text">Set <strong>Verify Token</strong> to the same passphrase you entered in Setup Step 2</div></div>
           <div class="gc-step"><div class="gc-step-num">5</div><div class="gc-step-text">Click <strong>Verify and Save</strong> → then subscribe to the <strong>messages</strong> field</div></div>
         </div>
-        <div class="gc-tip">💡 Using ngrok for local testing? Your webhook URL will be: https://xxxx.ngrok-free.app/webhook/whatsapp — update it every time ngrok restarts.</div>
+        <div class="gc-tip">💡 The app is hosted on Render, so this is your permanent live webhook URL. It will not change.</div>
       </div>
 
     </div><!-- /guide-grid -->
