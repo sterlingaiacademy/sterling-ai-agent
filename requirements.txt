@@ -12,3 +12,4 @@ supabase
 bcrypt
 itsdangerous
 starlette[full]
+pytz

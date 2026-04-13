@@ -1,11 +1,11 @@
 # agent/brain.py
 from openai import OpenAI
-from agent.memory import get_memory, save_memory
 from agent.tools.whatsapp import send_whatsapp_message
 from agent.tools.gmail import send_email
 from agent.tools.sheets import log_expense
 from agent.tools.calendar import create_event
 from dotenv import load_dotenv
+from agent.memory import get_memory, save_memory, save_user_message
 import json
 import os
 
@@ -64,7 +64,49 @@ TOOLS = [
                 "required": ["title", "start", "end"]
             }
         }
+    },
+    {
+    "type": "function",
+    "function": {
+        "name": "get_calendar_events",
+        "description": "View all calendar events for a specific date. Use this to check schedule and detect conflicts before creating new events.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "date": {"type": "string", "description": "Date in YYYY-MM-DD format"}
+            },
+            "required": ["date"]
+        }
     }
+},
+    {
+    "type": "function",
+    "function": {
+        "name": "get_emails",
+        "description": "View recent emails from Gmail inbox",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "max_results": {"type": "integer", "description": "Number of emails to fetch, default 5"}
+            },
+            "required": []
+        }
+    }
+},
+{
+    "type": "function",
+    "function": {
+        "name": "get_email_body",
+        "description": "Get full content of a specific email to summarize or read it",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "subject_keyword": {"type": "string", "description": "Keyword from the email subject to search"}
+            },
+            "required": ["subject_keyword"]
+        }
+    }
+},
 ]
 
 SYSTEM_PROMPT = """
@@ -82,6 +124,7 @@ Expense rules:
 
 async def run_agent(user_message: str, phone: str, client_data: dict):
     history = get_memory(phone)
+    save_user_message(phone, user_message) 
     history.append({"role": "user", "content": user_message})
 
     # First AI call
@@ -159,3 +202,12 @@ async def execute_tool(name: str, args: dict, client_data: dict):
 
     elif name == "create_calendar_event":
         return await create_event(client_data=client_data, **args)
+    elif name == "get_calendar_events":
+        from agent.tools.calendar import get_events
+        return await get_events(client_data=client_data, **args)
+    elif name == "get_emails":
+        from agent.tools.gmail import get_emails
+        return await get_emails(client_data=client_data, **args)
+    elif name == "get_email_body":
+        from agent.tools.gmail import get_email_body
+        return await get_email_body(client_data=client_data, **args)
