@@ -123,3 +123,17 @@ def get_google_credentials_for_client(client: dict):
         save_google_token(client["id"], creds.to_json())
 
     return creds
+@router.get("/auth/disconnect")
+async def disconnect_google(request: Request):
+    client_email = request.session.get("client_email")
+    if not client_email:
+        return JSONResponse({"status": "not logged in"})
+
+    client = get_client_by_email(client_email)
+    if client:
+        from agent.database import supabase
+        supabase.table("clients").update({
+            "google_token_json": None
+        }).eq("id", client["id"]).execute()
+
+    return JSONResponse({"status": "disconnected"})

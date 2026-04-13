@@ -545,13 +545,22 @@ body{
           <div class="perm-chip">🗂 Google Drive access</div>
         </div>
         <div class="gcc-actions">
-          <button class="btn btn-google" onclick="connectGoogle()">
-            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-            Sign in with Google
-          </button>
-          <div class="alert alert-ok show" id="g-ok" style="display:none;margin:0;flex:1;">✓ Google account connected successfully</div>
-        </div>
-      </div>
+  <!-- Show when NOT connected -->
+  <div id="g-signin-btn">
+    <button class="btn btn-google" onclick="connectGoogle()">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Sign in with Google
+    </button>
+  </div>
+
+  <!-- Show when connected -->
+  <div id="g-connected-btn" style="display:none;display:flex;align-items:center;gap:12px;flex:1;">
+    <div class="alert alert-ok" id="g-ok" style="margin:0;flex:1;display:block;">✓ Google account connected successfully</div>
+    <button class="btn btn-ghost" onclick="reconnectGoogle()" style="white-space:nowrap;font-size:12px;">
+      🔄 Reconnect
+    </button>
+  </div>
+</div>
 
       <div class="btn-row">
         <button class="btn btn-primary btn-lg" id="btn-next1" onclick="goToStep(2)" disabled>Continue to WhatsApp Setup &rarr;</button>
@@ -868,11 +877,12 @@ function goToStep(n){
 }
 
 /* ── Google auth ── */
+// ── Google auth ──
 async function checkGoogle(){
   try{
     const r=await fetch('/auth/status');
     const d=await r.json();
-    if(d.status==='connected')markGoogleDone();
+    if(d.status==='connected') markGoogleDone();
   }catch(_){}
 }
 
@@ -881,18 +891,53 @@ function markGoogleDone(){
   const st=document.getElementById('gstatus');
   st.classList.add('ok');
   st.innerHTML='<div class="dot"></div>Connected';
-  const ok=document.getElementById('g-ok');
-  ok.style.display='block';
+  // Show connected state with reconnect button
+  document.getElementById('g-signin-btn').style.display='none';
+  document.getElementById('g-connected-btn').style.display='flex';
   document.getElementById('btn-next1').disabled=false;
 }
 
+function markGoogleDisconnected(){
+  googleOk=false;
+  const st=document.getElementById('gstatus');
+  st.classList.remove('ok');
+  st.innerHTML='<div class="dot"></div>Not connected';
+  // Show sign in button
+  document.getElementById('g-signin-btn').style.display='block';
+  document.getElementById('g-connected-btn').style.display='none';
+  document.getElementById('btn-next1').disabled=true;
+}
+
+// First time sign in
 function connectGoogle(){
   const w=window.open('/auth/google','ga','width=520,height=620,scrollbars=yes');
   const t=setInterval(async()=>{
     try{
       const r=await fetch('/auth/status');
       const d=await r.json();
-      if(d.status==='connected'){clearInterval(t);if(w&&!w.closed)w.close();markGoogleDone();}
+      if(d.status==='connected'){
+        clearInterval(t);
+        if(w&&!w.closed)w.close();
+        markGoogleDone();
+      }
+    }catch(_){}
+  },2000);
+}
+
+// Reconnect — clears old token first
+async function reconnectGoogle(){
+  markGoogleDisconnected();
+  await fetch('/auth/disconnect');
+  const w=window.open('/auth/google','ga','width=520,height=620,scrollbars=yes');
+  const t=setInterval(async()=>{
+    try{
+      const r=await fetch('/auth/status');
+      const d=await r.json();
+      if(d.status==='connected'){
+        clearInterval(t);
+        if(w&&!w.closed)w.close();
+        markGoogleDone();
+      }
     }catch(_){}
   },2000);
 }
