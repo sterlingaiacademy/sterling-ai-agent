@@ -9,10 +9,14 @@ from agent.database import save_google_token, get_client_by_email
 router = APIRouter()
 
 SCOPES = [
-    'https://www.googleapis.com/auth/gmail.send',
-    'https://www.googleapis.com/auth/spreadsheets',
-    'https://www.googleapis.com/auth/calendar',
+    'https://www.googleapis.com/auth/gmail.send',        # send emails
+    'https://www.googleapis.com/auth/gmail.readonly',    # read/list emails
+    'https://www.googleapis.com/auth/spreadsheets',      # read & write sheets
+    'https://www.googleapis.com/auth/calendar',          # create events
+    'https://www.googleapis.com/auth/calendar.readonly', # view/list events
+    'https://www.googleapis.com/auth/drive.readonly',    # drive access
 ]
+
 
 AUTHORIZATION_BASE_URL = "https://accounts.google.com/o/oauth2/auth"
 TOKEN_URL = "https://oauth2.googleapis.com/token"
