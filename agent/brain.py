@@ -313,11 +313,9 @@ async def execute_tool(name: str, args: dict, client_data: dict, phone: str):
                 return "No voice recording found. Please send the voice note again."
             args["audio_url"] = audio_url
 
-        result = await upload_audio_to_fireflies(client_data=client_data, **args)
-
-        # Clear pending audio after successful upload
+        # Clear pending audio before making the upload attempt
         clear_pending_audio(phone)
-        return result
+        return await upload_audio_to_fireflies(client_data=client_data, **args)
 
     elif name == "get_meeting_transcripts":
         return await get_meeting_transcripts(client_data=client_data, **args)
