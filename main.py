@@ -105,7 +105,6 @@ async def whatsapp_webhook(request: Request):
                 )
 
             except Exception as e:
-                import traceback
                 print(f"[Webhook ERROR in Audio Download]\n{traceback.format_exc()}")
                 user_message = (
                     f"[Voice recording failed: {str(e)}] "

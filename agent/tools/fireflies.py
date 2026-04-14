@@ -32,12 +32,17 @@ async def invite_bot_to_meeting(meeting_url: str, meeting_name: str = "Meeting",
         timeout=15
     )
     data = response.json()
-    result = data.get("data", {}).get("addToLiveMeeting", {})
+    result = (data.get("data") or {}).get("addToLiveMeeting") or {}
     
     if result.get("success"):
         return f"✅ Fireflies bot is joining your meeting: '{meeting_name}'. It will record and transcribe automatically."
     else:
-        return f"❌ Could not join meeting: {result.get('message', 'Unknown error')}"
+        errors = data.get("errors", [])
+        if isinstance(errors, list) and len(errors) > 0:
+            error_msg = errors[0].get("message", "Unknown error")
+        else:
+            error_msg = result.get("message") or "Unknown error"
+        return f"❌ Could not join meeting: {error_msg}"
 
 
 async def upload_audio_to_fireflies(audio_url: str, meeting_name: str, client_data: dict = None):
