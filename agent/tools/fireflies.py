@@ -74,12 +74,17 @@ async def upload_audio_to_fireflies(audio_url: str, meeting_name: str, client_da
     print(f"[Fireflies] Response body: {response.text}")
     
     data = response.json()
-    result = data.get("data", {}).get("uploadAudio", {})
+    result = (data.get("data") or {}).get("uploadAudio") or {}
 
     if result.get("success"):
         return f"✅ Recording '{meeting_name}' uploaded to Fireflies successfully."
     else:
-        error_msg = result.get("message") or str(data.get("errors", "Unknown error"))
+        errors = data.get("errors", [])
+        if isinstance(errors, list) and len(errors) > 0:
+            error_msg = errors[0].get("message", "Unknown error")
+        else:
+            error_msg = result.get("message") or str(data.get("errors", "Unknown error"))
+            
         print(f"[Fireflies] Upload failed: {error_msg}")
         return f"❌ Upload failed: {error_msg}"
 
