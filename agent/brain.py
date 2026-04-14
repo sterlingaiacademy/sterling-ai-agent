@@ -8,7 +8,12 @@ from dotenv import load_dotenv
 from agent.memory import get_memory, save_memory, save_user_message
 import json
 import os
-
+from agent.tools.fireflies import (
+    invite_bot_to_meeting,
+    upload_audio_to_fireflies,
+    get_meeting_transcripts,
+    get_transcript_detail
+)
 load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -106,6 +111,63 @@ TOOLS = [
             "required": ["subject_keyword"]
         }
     }
+},{
+    "type": "function",
+    "function": {
+        "name": "invite_bot_to_meeting",
+        "description": "Send Fireflies AI bot to join and record a Google Meet, Zoom or Teams meeting link",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "meeting_url": {"type": "string", "description": "The meeting link e.g. https://meet.google.com/xxx"},
+                "meeting_name": {"type": "string", "description": "Name/title for this meeting"}
+            },
+            "required": ["meeting_url", "meeting_name"]
+        }
+    }
+},
+{
+    "type": "function",
+    "function": {
+        "name": "upload_audio_to_fireflies",
+        "description": "Upload a recorded audio file to Fireflies for transcription. Use when user sends a voice recording of a meeting.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "audio_url": {"type": "string", "description": "Direct URL to the audio file"},
+                "meeting_name": {"type": "string", "description": "Name to save this recording as"}
+            },
+            "required": ["audio_url", "meeting_name"]
+        }
+    }
+},
+{
+    "type": "function",
+    "function": {
+        "name": "get_meeting_transcripts",
+        "description": "Get list of recent meeting transcripts and summaries from Fireflies",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "limit": {"type": "integer", "description": "Number of recent meetings to fetch, default 3"}
+            },
+            "required": []
+        }
+    }
+},
+{
+    "type": "function",
+    "function": {
+        "name": "get_transcript_detail",
+        "description": "Get full details and transcript of a specific meeting by its title",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "meeting_title": {"type": "string", "description": "Title or keyword of the meeting to find"}
+            },
+            "required": ["meeting_title"]
+        }
+    }
 },
 ]
 
@@ -113,13 +175,22 @@ SYSTEM_PROMPT = """
 You are a smart personal assistant accessible via WhatsApp. You can:
 - Track expenses (detect credit/debit, amount, purpose, calculate running balance)
 - Send emails via Gmail
+- Read and summarize Gmail emails
 - Create Google Calendar events
-- Always reply to the user after completing any action.
+- View calendar events and detect conflicts
+- Join meetings via Fireflies bot (when user shares a meeting link)
+- Upload voice recordings to Fireflies for transcription
+- Retrieve and summarize meeting notes from Fireflies
+
+Meeting rules:
+- When user shares a Google Meet/Zoom/Teams link, ask for meeting name then invite the bot
+- When user sends a voice note, ask for the meeting name before uploading to Fireflies
+- When asked about a meeting, fetch from Fireflies and summarize clearly
 
 Expense rules:
 - Debit = subtract from balance
-- Credit = add to balance
-- If balance drops to 5000 or below, AUTOMATICALLY send a low balance alert email.
+- Credit = add to balance  
+- If balance drops to 5000 or below, AUTOMATICALLY send a low balance alert email
 """
 
 async def run_agent(user_message: str, phone: str, client_data: dict):
@@ -211,3 +282,15 @@ async def execute_tool(name: str, args: dict, client_data: dict):
     elif name == "get_email_body":
         from agent.tools.gmail import get_email_body
         return await get_email_body(client_data=client_data, **args)
+    elif name == "invite_bot_to_meeting":
+        return await invite_bot_to_meeting(client_data=client_data, **args)
+
+    elif name == "upload_audio_to_fireflies":
+        return await upload_audio_to_fireflies(client_data=client_data, **args)
+
+    elif name == "get_meeting_transcripts":
+        return await get_meeting_transcripts(client_data=client_data, **args)
+
+    elif name == "get_transcript_detail":
+        return await get_transcript_detail(client_data=client_data, **args)     
+    
