@@ -184,4 +184,14 @@ async def download_and_store_audio(media_id: str, token: str) -> str:
 
     # Step 6: Get public URL
     public_url = supabase.storage.from_("recordings").get_public_url(filename)
+    print(f"[Audio] Uploaded to Supabase. Public URL: {public_url}")
+    print(f"[Audio] File size: {len(audio_response.content)} bytes")
+    
+    # Step 7: Verify public URL is accessible
+    try:
+        check = req.head(public_url, timeout=10)
+        print(f"[Audio] Public URL check: status={check.status_code}, content-length={check.headers.get('content-length', 'unknown')}")
+    except Exception as e:
+        print(f"[Audio] Could not verify public URL: {e}")
+    
     return public_url
