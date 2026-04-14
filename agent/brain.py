@@ -225,7 +225,7 @@ async def run_agent(user_message: str, phone: str, client_data: dict):
         for tool_call in reply_message.tool_calls:
             fn_name = tool_call.function.name
             args    = json.loads(tool_call.function.arguments)
-            result = await execute_tool(fn_name, args, client_data)
+            result = await execute_tool(fn_name, args, client_data, phone)
             tool_results.append({
                 "tool_call_id": tool_call.id,
                 "role":         "tool",
