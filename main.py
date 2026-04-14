@@ -105,6 +105,8 @@ async def whatsapp_webhook(request: Request):
                 )
 
             except Exception as e:
+                import traceback
+                print(f"[Webhook ERROR in Audio Download]\n{traceback.format_exc()}")
                 user_message = (
                     f"[Voice recording failed: {str(e)}] "
                     f"Tell the user there was an issue."
@@ -135,6 +137,7 @@ async def get_whatsapp_media_url(media_id: str, token: str) -> str:
 # ── Helper: Download audio and store in Supabase ───────────────────────────────
 async def download_and_store_audio(media_id: str, token: str) -> str:
     from agent.database import supabase
+    import tempfile
 
     # Step 1: Get media URL from Meta
     meta_response = req.get(
@@ -142,26 +145,43 @@ async def download_and_store_audio(media_id: str, token: str) -> str:
         headers={"Authorization": f"Bearer {token}"},
         timeout=10
     )
+    if meta_response.status_code != 200:
+        raise Exception(f"Failed to get media info from Meta: {meta_response.text}")
+    
     media_url = meta_response.json().get("url", "")
     if not media_url:
-        raise Exception("Could not get media URL from Meta")
+        raise Exception(f"Could not get media URL from Meta response: {meta_response.json()}")
 
     # Step 2: Download the actual audio file
-    audio_response = req.get(
-        media_url,
-        headers={"Authorization": f"Bearer {token}"},
-        timeout=30
-    )
-    audio_bytes = audio_response.content
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+    }
+    audio_response = req.get(media_url, headers=headers, timeout=30)
+    
+    if audio_response.status_code != 200:
+        raise Exception(f"Failed to download audio. Status: {audio_response.status_code}, Response: {audio_response.text}")
 
-    # Step 3: Upload to Supabase Storage
+    # Step 3: Save to a temporary file locally before upload
+    # Supabase python client robustly handles local file paths via string.
     filename = f"recording_{uuid.uuid4().hex}.ogg"
-    supabase.storage.from_("recordings").upload(
-        filename,
-        audio_bytes,
-        {"content-type": "audio/ogg"}
-    )
+    
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".ogg") as tmp_file:
+        tmp_file.write(audio_response.content)
+        tmp_file_path = tmp_file.name
 
-    # Step 4: Get public URL
+    try:
+        # Step 4: Upload to Supabase Storage
+        supabase.storage.from_("recordings").upload(
+            filename,
+            tmp_file_path,
+            {"content-type": "audio/ogg"}
+        )
+    finally:
+        # Step 5: Clean up temporary file
+        if os.path.exists(tmp_file_path):
+            os.remove(tmp_file_path)
+
+    # Step 6: Get public URL
     public_url = supabase.storage.from_("recordings").get_public_url(filename)
     return public_url
