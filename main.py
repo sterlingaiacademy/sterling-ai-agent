@@ -95,8 +95,9 @@ async def whatsapp_webhook(request: Request):
             try:
                 public_audio_url = await download_and_store_audio(media_id, token)
 
-                # ✅ Save URL to database so next message can use it
-                from agent.database import save_pending_audio
+                # ✅ Clear any old stale URL first, then save the new one
+                from agent.database import save_pending_audio, clear_pending_audio
+                clear_pending_audio(sender_phone)
                 save_pending_audio(sender_phone, public_audio_url)
 
                 user_message = (
