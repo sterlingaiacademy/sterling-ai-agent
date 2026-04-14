@@ -14,6 +14,8 @@ from agent.tools.fireflies import (
     get_meeting_transcripts,
     get_transcript_detail
 )
+from datetime import datetime
+import pytz
 load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -192,19 +194,28 @@ Expense rules:
 - Credit = add to balance  
 - If balance drops to 5000 or below, AUTOMATICALLY send a low balance alert email
 """
-
 async def run_agent(user_message: str, phone: str, client_data: dict):
+    # Get current date and time in client's timezone
+    timezone = client_data.get("timezone") or "Asia/Kolkata"
+    tz = pytz.timezone(timezone)
+    now = datetime.now(tz)
+    current_datetime = now.strftime("%A, %d %B %Y %I:%M %p")  
+    # Example: "Monday, 14 April 2026 10:42 AM"
+
+    # Inject date into system prompt
+    dated_system_prompt = SYSTEM_PROMPT + f"\n\nCURRENT DATE AND TIME: {current_datetime}\nTimezone: {timezone}\n\nAlways use this date as 'today' when user says today/tomorrow/yesterday/next week etc. Never assume any other date."
+
     history = get_memory(phone)
-    save_user_message(phone, user_message) 
     history.append({"role": "user", "content": user_message})
 
     # First AI call
     response = client.chat.completions.create(
         model="gpt-4o",
-        messages=[{"role": "system", "content": SYSTEM_PROMPT}] + history,
+        messages=[{"role": "system", "content": dated_system_prompt}] + history,
         tools=TOOLS,
         tool_choice="auto"
     )
+
 
     reply_message = response.choices[0].message
 
@@ -241,7 +252,7 @@ async def run_agent(user_message: str, phone: str, client_data: dict):
         # Second AI call with tool results
         final_response = client.chat.completions.create(
             model="gpt-4o",
-            messages=[{"role": "system", "content": SYSTEM_PROMPT}] + history,
+             messages=[{"role": "system", "content": dated_system_prompt}] + history,
         )
         final_text = final_response.choices[0].message.content
     else:
