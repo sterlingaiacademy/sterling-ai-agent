@@ -47,8 +47,8 @@ async def upload_audio_to_fireflies(audio_url: str, meeting_name: str, client_da
     print(f"[Fireflies] API Key exists: {bool(os.getenv('FIREFLIES_API_KEY'))}")
     
     query = """
-    mutation UploadAudio($url: String!, $title: String!) {
-        uploadAudio(url: $url, title: $title) {
+    mutation UploadAudio($input: AudioUploadInput!) {
+        uploadAudio(input: $input) {
             success
             title
             message
@@ -60,8 +60,10 @@ async def upload_audio_to_fireflies(audio_url: str, meeting_name: str, client_da
         json={
             "query": query,
             "variables": {
-                "url": audio_url,
-                "title": meeting_name
+                "input": {
+                    "url": audio_url,
+                    "title": meeting_name
+                }
             }
         },
         headers=get_headers(),
