@@ -94,15 +94,20 @@ async def whatsapp_webhook(request: Request):
 
             try:
                 public_audio_url = await download_and_store_audio(media_id, token)
+
+                # ✅ Save URL to database so next message can use it
+                from agent.database import save_pending_audio
+                save_pending_audio(sender_phone, public_audio_url)
+
                 user_message = (
-                    f"[Voice recording received and stored. "
-                    f"Public URL: {public_audio_url}] "
+                    f"[Voice recording received and stored at: {public_audio_url}] "
                     f"Ask the user what name to save this recording as in Fireflies."
                 )
+
             except Exception as e:
                 user_message = (
-                    f"[Voice recording received but could not be processed: {str(e)}] "
-                    f"Tell the user there was an issue with the recording."
+                    f"[Voice recording failed: {str(e)}] "
+                    f"Tell the user there was an issue."
                 )
 
             await run_agent(user_message, sender_phone, client)

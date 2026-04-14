@@ -29,3 +29,17 @@ def create_client_account(email: str, password_hash: str):
         "password_hash": password_hash
     }).execute()
     return result.data[0]
+def save_pending_audio(wa_phone: str, audio_url: str):
+    supabase.table("clients").update({
+        "pending_audio_url": audio_url
+    }).eq("wa_phone", wa_phone).execute()
+
+def get_pending_audio(wa_phone: str):
+    result = supabase.table("clients").select("pending_audio_url")\
+        .eq("wa_phone", wa_phone).execute()
+    return result.data[0].get("pending_audio_url") if result.data else None
+
+def clear_pending_audio(wa_phone: str):
+    supabase.table("clients").update({
+        "pending_audio_url": None
+    }).eq("wa_phone", wa_phone).execute()

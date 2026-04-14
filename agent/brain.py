@@ -266,7 +266,9 @@ async def run_agent(user_message: str, phone: str, client_data: dict):
     save_memory(phone, history)
 
 
-async def execute_tool(name: str, args: dict, client_data: dict):
+
+
+async def execute_tool(name: str, args: dict, client_data: dict, phone: str):
     if name == "send_email":
         return await send_email(client_data=client_data, **args)
 
@@ -284,24 +286,42 @@ async def execute_tool(name: str, args: dict, client_data: dict):
 
     elif name == "create_calendar_event":
         return await create_event(client_data=client_data, **args)
+
     elif name == "get_calendar_events":
         from agent.tools.calendar import get_events
         return await get_events(client_data=client_data, **args)
+
     elif name == "get_emails":
         from agent.tools.gmail import get_emails
         return await get_emails(client_data=client_data, **args)
+
     elif name == "get_email_body":
         from agent.tools.gmail import get_email_body
         return await get_email_body(client_data=client_data, **args)
+
     elif name == "invite_bot_to_meeting":
         return await invite_bot_to_meeting(client_data=client_data, **args)
 
     elif name == "upload_audio_to_fireflies":
-        return await upload_audio_to_fireflies(client_data=client_data, **args)
+        from agent.tools.fireflies import upload_audio_to_fireflies
+        from agent.database import get_pending_audio, clear_pending_audio
+
+        # Get audio URL from database if not in args
+        if not args.get("audio_url"):
+            audio_url = get_pending_audio(phone)
+            if not audio_url:
+                return "No voice recording found. Please send the voice note again."
+            args["audio_url"] = audio_url
+
+        result = await upload_audio_to_fireflies(client_data=client_data, **args)
+
+        # Clear pending audio after successful upload
+        clear_pending_audio(phone)
+        return result
 
     elif name == "get_meeting_transcripts":
         return await get_meeting_transcripts(client_data=client_data, **args)
 
     elif name == "get_transcript_detail":
-        return await get_transcript_detail(client_data=client_data, **args)     
+        return await get_transcript_detail(client_data=client_data, **args)  
     
