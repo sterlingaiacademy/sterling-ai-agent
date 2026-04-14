@@ -41,7 +41,11 @@ async def invite_bot_to_meeting(meeting_url: str, meeting_name: str = "Meeting",
 
 
 async def upload_audio_to_fireflies(audio_url: str, meeting_name: str, client_data: dict = None):
-    """Upload a recorded audio/video file to Fireflies for transcription."""
+    """Upload a recorded audio file to Fireflies for transcription."""
+    
+    print(f"[Fireflies] Uploading: {meeting_name} | URL: {audio_url}")
+    print(f"[Fireflies] API Key exists: {bool(os.getenv('FIREFLIES_API_KEY'))}")
+    
     query = """
     mutation UploadAudio($url: String!, $title: String!) {
         uploadAudio(url: $url, title: $title) {
@@ -63,14 +67,19 @@ async def upload_audio_to_fireflies(audio_url: str, meeting_name: str, client_da
         headers=get_headers(),
         timeout=15
     )
+    
+    print(f"[Fireflies] Response status: {response.status_code}")
+    print(f"[Fireflies] Response body: {response.text}")
+    
     data = response.json()
     result = data.get("data", {}).get("uploadAudio", {})
 
     if result.get("success"):
-        return f"✅ Recording '{meeting_name}' uploaded to Fireflies. Transcription will be ready shortly."
+        return f"✅ Recording '{meeting_name}' uploaded to Fireflies successfully."
     else:
-        return f"❌ Upload failed: {result.get('message', 'Unknown error')}"
-
+        error_msg = result.get("message") or str(data.get("errors", "Unknown error"))
+        print(f"[Fireflies] Upload failed: {error_msg}")
+        return f"❌ Upload failed: {error_msg}"
 
 async def get_meeting_transcripts(limit: int = 3, client_data: dict = None):
     """Get recent meeting transcripts from Fireflies."""
