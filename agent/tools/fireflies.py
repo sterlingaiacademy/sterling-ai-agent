@@ -35,7 +35,7 @@ async def invite_bot_to_meeting(meeting_url: str, meeting_name: str = "Meeting",
     result = (data.get("data") or {}).get("addToLiveMeeting") or {}
     
     if result.get("success"):
-        return f"✅ Fireflies bot is joining your meeting: '{meeting_name}'. It will record and transcribe automatically."
+        return f"✅ Your assistant is joining your meeting: '{meeting_name}'. It will record and transcribe automatically."
     else:
         errors = data.get("errors", [])
         if isinstance(errors, list) and len(errors) > 0:
@@ -82,7 +82,7 @@ async def upload_audio_to_fireflies(audio_url: str, meeting_name: str, client_da
     result = (data.get("data") or {}).get("uploadAudio") or {}
 
     if result.get("success"):
-        return f"✅ Recording '{meeting_name}' uploaded to Fireflies successfully."
+        return f"✅ Recording '{meeting_name}' has been saved and is being transcribed by your assistant."
     else:
         errors = data.get("errors", [])
         if isinstance(errors, list) and len(errors) > 0:
@@ -123,7 +123,7 @@ async def get_meeting_transcripts(limit: int = 3, client_data: dict = None):
     transcripts = data.get("data", {}).get("transcripts", [])
 
     if not transcripts:
-        return "No meeting transcripts found in Fireflies."
+        return "No meeting transcripts found."
 
     result = ""
     for t in transcripts:

@@ -6,6 +6,7 @@ from agent.tools.sheets import log_expense
 from agent.tools.calendar import create_event
 from dotenv import load_dotenv
 from agent.memory import get_memory, save_memory, save_user_message
+from agent.tools.search import search_web
 import json
 import os
 from agent.tools.fireflies import (
@@ -194,6 +195,20 @@ TOOLS = [
         }
     }
 },
+{
+    "type": "function",
+    "function": {
+        "name": "search_web",
+        "description": "Search the internet for real-time information such as current weather, news, prices, sports scores, or any factual question that requires up-to-date knowledge. Use this whenever the user asks about something that may have changed recently.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "The search query to look up"}
+            },
+            "required": ["query"]
+        }
+    }
+},
 ]
 
 SYSTEM_PROMPT = """
@@ -203,14 +218,16 @@ You are a smart personal assistant accessible via WhatsApp. You can:
 - Read and summarize Gmail emails
 - Create Google Calendar events
 - View calendar events and detect conflicts
-- Join meetings via Fireflies bot (when user shares a meeting link)
-- Upload voice recordings to Fireflies for transcription
-- Retrieve and summarize meeting notes from Fireflies
+- Join meetings using your assistant (when user shares a meeting link) — NEVER mention "Fireflies" to the user, always refer to it as "your assistant"
+- Record and transcribe voice notes using your assistant
+- Retrieve and summarize meeting notes
+- Search the internet for real-time information (weather, news, prices, etc.)
 
 Meeting rules:
-- When user shares a Google Meet/Zoom/Teams link, ask for meeting name then invite the bot
-- When user sends a voice note, ask for the meeting name before uploading to Fireflies
-- When asked about a meeting, fetch from Fireflies and summarize clearly
+- When user shares a Google Meet/Zoom/Teams link, ask for meeting name then invite your assistant
+- When user sends a voice note, ask for the meeting name before saving
+- When asked about a meeting, fetch and summarize clearly
+- NEVER use the word "Fireflies" in any reply to the user — always say "your assistant" instead
 
 Meeting recording rules:
 - When user sends a voice note, ask what name to give the meeting
@@ -219,6 +236,9 @@ Meeting recording rules:
 - When user asks about a meeting, use get_meeting_summary
 - When user asks to list meetings, use get_all_meetings
 
+Web search rules:
+- For any question about current events, weather, news, stock prices, sports, or anything time-sensitive, ALWAYS use the search_web tool first
+- Do NOT answer real-time questions from memory alone — always search first
 
 Expense rules:
 - Debit = subtract from balance
@@ -226,6 +246,9 @@ Expense rules:
 - If balance drops to 5000 or below, AUTOMATICALLY send a low balance alert email
 
 """
+# Deduplication: track recently sent replies per phone to prevent duplicate messages
+_last_reply: dict = {}
+
 async def run_agent(user_message: str, phone: str, client_data: dict):
     # Get current date and time in client's timezone
     timezone = client_data.get("timezone") or "Asia/Kolkata"
@@ -247,7 +270,6 @@ async def run_agent(user_message: str, phone: str, client_data: dict):
         tools=TOOLS,
         tool_choice="auto"
     )
-
 
     reply_message = response.choices[0].message
 
@@ -284,11 +306,18 @@ async def run_agent(user_message: str, phone: str, client_data: dict):
         # Second AI call with tool results
         final_response = client.chat.completions.create(
             model="gpt-4o",
-             messages=[{"role": "system", "content": dated_system_prompt}] + history,
+            messages=[{"role": "system", "content": dated_system_prompt}] + history,
         )
         final_text = final_response.choices[0].message.content
     else:
         final_text = reply_message.content
+
+    # ── Deduplication guard: skip if this exact reply was just sent ──
+    last = _last_reply.get(phone)
+    if last and last["text"] == final_text and (now.timestamp() - last["ts"]) < 10:
+        print(f"[Dedup] Skipping duplicate reply to {phone}")
+        return
+    _last_reply[phone] = {"text": final_text, "ts": now.timestamp()}
 
     # Send WhatsApp reply using per-user credentials from Supabase
     await send_whatsapp_message(phone, final_text, client_data=client_data)
@@ -368,3 +397,6 @@ async def execute_tool(name: str, args: dict, client_data: dict, phone: str):
 
     elif name == "get_transcript_detail":
         return await get_transcript_detail(client_data=client_data, **args)
+
+    elif name == "search_web":
+        return await search_web(**args)

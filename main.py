@@ -15,6 +15,9 @@ load_dotenv()
 
 app = FastAPI(title="Sterling AI Assistant")
 
+# ── Message deduplication to prevent WhatsApp webhook retries from firing twice ─
+_processed_message_ids: set = set()
+
 app.add_middleware(
     SessionMiddleware,
     secret_key=os.getenv("SESSION_SECRET", "sterling-secret-change-this")
@@ -73,6 +76,17 @@ async def whatsapp_webhook(request: Request):
 
         message = entry["messages"][0]
         sender_phone = message["from"]
+        message_id = message.get("id", "")
+
+        # Deduplicate: WhatsApp sometimes delivers the same webhook event twice
+        if message_id and message_id in _processed_message_ids:
+            print(f"[Webhook] Duplicate message_id {message_id}, skipping.")
+            return {"status": "duplicate"}
+        if message_id:
+            _processed_message_ids.add(message_id)
+            # Keep the set from growing unbounded — trim oldest if too large
+            if len(_processed_message_ids) > 500:
+                _processed_message_ids.pop()
 
         client = get_client_by_phone(sender_phone)
         if not client:
