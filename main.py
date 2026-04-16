@@ -21,9 +21,9 @@ app.add_middleware(
 )
 
 # ── Routers ────────────────────────────────────────────────────────────────────
-app.include_router(login_router)   # /login  /logout
-app.include_router(auth_router)    # /auth/google  /auth/callback  /auth/status
-app.include_router(setup_router)   # /setup  /setup/verify  /setup/whatsapp
+app.include_router(login_router)
+app.include_router(auth_router)
+app.include_router(setup_router)
 
 
 # ── Root → redirect to login ───────────────────────────────────────────────────
@@ -34,7 +34,7 @@ async def root(request: Request):
     return RedirectResponse(url="/login")
 
 
-# ── Protect /setup and /auth routes ───────────────────────────────────────────
+# ── Protect routes ─────────────────────────────────────────────────────────────
 @app.middleware("http")
 async def auth_guard(request: Request, call_next):
     protected = ["/setup", "/auth/google", "/auth/status"]
@@ -92,26 +92,14 @@ async def whatsapp_webhook(request: Request):
             media_id = message["audio"]["id"]
             token = client.get("wa_token")
 
-            try:
-                public_audio_url = await download_and_store_audio(media_id, token)
+            # Store media_id in database — ask for name first
+            from agent.database import save_pending_audio
+            save_pending_audio(sender_phone, media_id)
 
-                # ✅ Clear any old stale URL first, then save the new one
-                from agent.database import save_pending_audio, clear_pending_audio
-                clear_pending_audio(sender_phone)
-                save_pending_audio(sender_phone, public_audio_url)
-
-                user_message = (
-                    f"[Voice recording received and stored at: {public_audio_url}] "
-                    f"Ask the user what name to save this recording as in Fireflies."
-                )
-
-            except Exception as e:
-                print(f"[Webhook ERROR in Audio Download]\n{traceback.format_exc()}")
-                user_message = (
-                    f"[Voice recording failed: {str(e)}] "
-                    f"Tell the user there was an issue."
-                )
-
+            user_message = (
+                f"[Voice note received. Media ID saved.] "
+                f"Ask the user what name to give this meeting recording."
+            )
             await run_agent(user_message, sender_phone, client)
 
         else:
@@ -134,12 +122,11 @@ async def get_whatsapp_media_url(media_id: str, token: str) -> str:
     return response.json().get("url", "")
 
 
-# ── Helper: Download audio and store in Supabase ───────────────────────────────
+# ── Helper: Download audio and store ───────────────────────────────────────────
 async def download_and_store_audio(media_id: str, token: str) -> str:
     from agent.database import supabase
     import tempfile
 
-    # Step 1: Get media URL from Meta
     meta_response = req.get(
         f"https://graph.facebook.com/v18.0/{media_id}",
         headers={"Authorization": f"Bearer {token}"},
@@ -147,51 +134,37 @@ async def download_and_store_audio(media_id: str, token: str) -> str:
     )
     if meta_response.status_code != 200:
         raise Exception(f"Failed to get media info from Meta: {meta_response.text}")
-    
+
     media_url = meta_response.json().get("url", "")
     if not media_url:
         raise Exception(f"Could not get media URL from Meta response: {meta_response.json()}")
 
-    # Step 2: Download the actual audio file
     headers = {
         "Authorization": f"Bearer {token}",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        "User-Agent": "Mozilla/5.0"
     }
     audio_response = req.get(media_url, headers=headers, timeout=30)
-    
-    if audio_response.status_code != 200:
-        raise Exception(f"Failed to download audio. Status: {audio_response.status_code}, Response: {audio_response.text}")
 
-    # Step 3: Save to a temporary file locally before upload
-    # Supabase python client robustly handles local file paths via string.
+    if audio_response.status_code != 200:
+        raise Exception(f"Failed to download audio: {audio_response.text}")
+
     filename = f"recording_{uuid.uuid4().hex}.ogg"
-    
+
     with tempfile.NamedTemporaryFile(delete=False, suffix=".ogg") as tmp_file:
         tmp_file.write(audio_response.content)
         tmp_file_path = tmp_file.name
 
     try:
-        # Step 4: Upload to Supabase Storage
         supabase.storage.from_("recordings").upload(
             filename,
             tmp_file_path,
             {"content-type": "audio/ogg"}
         )
     finally:
-        # Step 5: Clean up temporary file
         if os.path.exists(tmp_file_path):
             os.remove(tmp_file_path)
 
-    # Step 6: Get public URL
     public_url = supabase.storage.from_("recordings").get_public_url(filename)
-    print(f"[Audio] Uploaded to Supabase. Public URL: {public_url}")
-    print(f"[Audio] File size: {len(audio_response.content)} bytes")
-    
-    # Step 7: Verify public URL is accessible
-    try:
-        check = req.head(public_url, timeout=10)
-        print(f"[Audio] Public URL check: status={check.status_code}, content-length={check.headers.get('content-length', 'unknown')}")
-    except Exception as e:
-        print(f"[Audio] Could not verify public URL: {e}")
-    
+    print(f"[Audio] Uploaded: {public_url}")
+
     return public_url

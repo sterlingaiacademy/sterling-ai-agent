@@ -131,21 +131,6 @@ TOOLS = [
 {
     "type": "function",
     "function": {
-        "name": "upload_audio_to_fireflies",
-        "description": "Upload a recorded audio file to Fireflies for transcription. Use when user sends a voice recording of a meeting.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "audio_url": {"type": "string", "description": "Direct URL to the audio file"},
-                "meeting_name": {"type": "string", "description": "Name to save this recording as"}
-            },
-            "required": ["audio_url", "meeting_name"]
-        }
-    }
-},
-{
-    "type": "function",
-    "function": {
         "name": "get_meeting_transcripts",
         "description": "Get list of recent meeting transcripts and summaries from Fireflies",
         "parameters": {
@@ -170,6 +155,44 @@ TOOLS = [
             "required": ["meeting_title"]
         }
     }
+},{
+    "type": "function",
+    "function": {
+        "name": "save_meeting_recording",
+        "description": "Transcribe and save a voice note meeting recording. Use when user provides a name for their voice recording.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "meeting_name": {"type": "string", "description": "Name to save this meeting as"}
+            },
+            "required": ["meeting_name"]
+        }
+    }
+},
+{
+    "type": "function",
+    "function": {
+        "name": "get_meeting_summary",
+        "description": "Get summary and action items of a saved meeting",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "meeting_name": {"type": "string", "description": "Name or keyword of the meeting"}
+            },
+            "required": ["meeting_name"]
+        }
+    }
+},
+{
+    "type": "function",
+    "function": {
+        "name": "get_all_meetings",
+        "description": "Get list of all saved meeting recordings",
+        "parameters": {
+            "type": "object",
+            "properties": {}
+        }
+    }
 },
 ]
 
@@ -189,10 +212,19 @@ Meeting rules:
 - When user sends a voice note, ask for the meeting name before uploading to Fireflies
 - When asked about a meeting, fetch from Fireflies and summarize clearly
 
+Meeting recording rules:
+- When user sends a voice note, ask what name to give the meeting
+- When user provides the name, call save_meeting_recording
+- The recording will be transcribed and summarized automatically
+- When user asks about a meeting, use get_meeting_summary
+- When user asks to list meetings, use get_all_meetings
+
+
 Expense rules:
 - Debit = subtract from balance
 - Credit = add to balance  
 - If balance drops to 5000 or below, AUTOMATICALLY send a low balance alert email
+
 """
 async def run_agent(user_message: str, phone: str, client_data: dict):
     # Get current date and time in client's timezone
@@ -267,8 +299,8 @@ async def run_agent(user_message: str, phone: str, client_data: dict):
 
 
 
-
 async def execute_tool(name: str, args: dict, client_data: dict, phone: str):
+
     if name == "send_email":
         return await send_email(client_data=client_data, **args)
 
@@ -302,24 +334,37 @@ async def execute_tool(name: str, args: dict, client_data: dict, phone: str):
     elif name == "invite_bot_to_meeting":
         return await invite_bot_to_meeting(client_data=client_data, **args)
 
-    elif name == "upload_audio_to_fireflies":
-        from agent.tools.fireflies import upload_audio_to_fireflies
+    elif name == "save_meeting_recording":
+        from agent.tools.transcribe import transcribe_and_save
         from agent.database import get_pending_audio, clear_pending_audio
 
-        # Get audio URL from database if not in args
-        if not args.get("audio_url"):
-            audio_url = get_pending_audio(phone)
-            if not audio_url:
-                return "No voice recording found. Please send the voice note again."
-            args["audio_url"] = audio_url
+        media_id = get_pending_audio(phone)
+        if not media_id:
+            return "No voice recording found. Please send the voice note again."
 
-        # Clear pending audio before making the upload attempt
+        token = client_data.get("wa_token")
+        meeting_name = args.get("meeting_name", "Meeting")
+
+        result = await transcribe_and_save(
+            media_id=media_id,
+            token=token,
+            meeting_name=meeting_name,
+            wa_phone=phone
+        )
+
         clear_pending_audio(phone)
-        return await upload_audio_to_fireflies(client_data=client_data, **args)
+        return result
+
+    elif name == "get_meeting_summary":
+        from agent.tools.transcribe import get_meeting_summary
+        return await get_meeting_summary(wa_phone=phone, **args)
+
+    elif name == "get_all_meetings":
+        from agent.tools.transcribe import get_all_meetings
+        return await get_all_meetings(wa_phone=phone)
 
     elif name == "get_meeting_transcripts":
         return await get_meeting_transcripts(client_data=client_data, **args)
 
     elif name == "get_transcript_detail":
-        return await get_transcript_detail(client_data=client_data, **args)  
-    
+        return await get_transcript_detail(client_data=client_data, **args)
