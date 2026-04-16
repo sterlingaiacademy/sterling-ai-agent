@@ -1,78 +1,58 @@
 # agent/tools/search.py
 """
-Real-time web search tool for the AI assistant.
-Uses DuckDuckGo Instant Answer API (free, no key needed) as primary,
-with a scraping fallback for richer results.
+Real-time web search using OpenAI's native web_search_preview tool.
+This gives the agent full internet access — same quality as browsing Chrome.
+No extra API keys needed (uses the existing OPENAI_API_KEY).
+
+Works for:
+  - Latest news (BBC, CNN, etc.)
+  - Live weather
+  - Stock prices
+  - Sports scores
+  - Any real-time information
 """
 
-import requests
-import urllib.parse
-import json
+import os
+from openai import OpenAI
 
-DDGO_API = "https://api.duckduckgo.com/"
+_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 async def search_web(query: str) -> str:
-    """Search the internet and return concise, real-time results."""
-    print(f"[Search] Querying: {query}")
+    """
+    Search the internet using OpenAI's built-in web search.
+    Returns a detailed, real-time answer based on live web results.
+    """
+    print(f"[Search] Searching web for: {query}")
 
     try:
-        # ── DuckDuckGo Instant Answer (primary) ───────────────────────────
-        params = {
-            "q": query,
-            "format": "json",
-            "no_html": "1",
-            "skip_disambig": "1"
-        }
-        resp = requests.get(DDGO_API, params=params, timeout=10)
-        data = resp.json()
-
-        parts = []
-
-        # Abstract (best single answer)
-        abstract = data.get("AbstractText", "").strip()
-        if abstract:
-            parts.append(abstract)
-
-        # Answer (e.g. "Delhi weather: 35°C")
-        answer = data.get("Answer", "").strip()
-        if answer and answer not in parts:
-            parts.append(answer)
-
-        # Related topics (up to 3)
-        for topic in data.get("RelatedTopics", [])[:3]:
-            text = topic.get("Text", "").strip()
-            if text and text not in parts:
-                parts.append(f"• {text}")
-
-        if parts:
-            result = "\n".join(parts)
-            print(f"[Search] DDG result: {result[:200]}")
-            return result
-
-        # ── Fallback: DuckDuckGo HTML search scrape ───────────────────────
-        fallback_resp = requests.get(
-            "https://html.duckduckgo.com/html/",
-            params={"q": query},
-            headers={"User-Agent": "Mozilla/5.0 (compatible; SterlingBot/1.0)"},
-            timeout=10
+        # Use OpenAI Responses API with web_search_preview
+        # This gives real-time internet access — reads actual websites
+        response = _client.responses.create(
+            model="gpt-4o-mini-search-preview",
+            tools=[{"type": "web_search_preview"}],
+            input=query,
         )
-        text = fallback_resp.text
 
-        # Extract first few result snippets from raw HTML
-        import re
-        snippets = re.findall(r'class="result__snippet"[^>]*>(.*?)</a>', text, re.DOTALL)
-        # Clean HTML tags
-        clean = [re.sub(r"<[^>]+>", "", s).strip() for s in snippets[:3]]
-        clean = [c for c in clean if len(c) > 20]
+        result = response.output_text
+        print(f"[Search] Got result ({len(result)} chars)")
+        return result
 
-        if clean:
-            result = "\n".join(f"• {c}" for c in clean)
-            print(f"[Search] Fallback result: {result[:200]}")
-            return result
+    except Exception as primary_err:
+        print(f"[Search] Primary search failed: {primary_err}")
 
-        return f"I searched for \"{query}\" but couldn't find a clear answer. You may want to check Google directly."
+        # Fallback: try with gpt-4o-search-preview
+        try:
+            response = _client.responses.create(
+                model="gpt-4o-search-preview",
+                tools=[{"type": "web_search_preview"}],
+                input=query,
+            )
+            return response.output_text
 
-    except Exception as e:
-        print(f"[Search] Error: {e}")
-        return f"Sorry, I wasn't able to search the web right now ({str(e)}). Please try again."
+        except Exception as fallback_err:
+            print(f"[Search] Fallback also failed: {fallback_err}")
+            return (
+                f"I attempted to search for \"{query}\" but the web search "
+                f"is temporarily unavailable. Error: {str(fallback_err)}"
+            )

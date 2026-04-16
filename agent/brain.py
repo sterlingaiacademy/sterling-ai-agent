@@ -212,7 +212,10 @@ TOOLS = [
 ]
 
 SYSTEM_PROMPT = """
-You are a smart personal assistant accessible via WhatsApp. You can:
+You are a smart personal assistant accessible via WhatsApp. You remember everything the user has ever told you — all past conversations are stored and loaded every time they message.
+
+You can:
+- Remember and recall anything from past conversations (names, preferences, past tasks, expenses, etc.)
 - Track expenses (detect credit/debit, amount, purpose, calculate running balance)
 - Send emails via Gmail
 - Read and summarize Gmail emails
@@ -221,7 +224,12 @@ You are a smart personal assistant accessible via WhatsApp. You can:
 - Join meetings using your assistant (when user shares a meeting link) — NEVER mention "Fireflies" to the user, always refer to it as "your assistant"
 - Record and transcribe voice notes using your assistant
 - Retrieve and summarize meeting notes
-- Search the internet for real-time information (weather, news, prices, etc.)
+- Search the internet for REAL-TIME information (latest news, weather, prices, sports, anything)
+
+Memory rules:
+- You have FULL memory of all past conversations. If the user says "remember I told you X", confirm you do if it's in history
+- When asked "what do you know about me" or "what have we talked about", summarize from conversation history
+- NEVER say you don't have memory or can't remember — you always have the full chat history
 
 Meeting rules:
 - When user shares a Google Meet/Zoom/Teams link, ask for meeting name then invite your assistant
@@ -237,14 +245,15 @@ Meeting recording rules:
 - When user asks to list meetings, use get_all_meetings
 
 Web search rules:
-- For any question about current events, weather, news, stock prices, sports, or anything time-sensitive, ALWAYS use the search_web tool first
-- Do NOT answer real-time questions from memory alone — always search first
+- You have FULL internet access. For ANY question about news, weather, prices, sports scores, current events, or anything that changes over time — ALWAYS use search_web first
+- You CAN get BBC news, CNN, stock prices, cricket scores, weather — just call search_web
+- NEVER say you cannot access the internet or check websites — you always can via search_web
+- Do NOT answer time-sensitive questions from memory alone — always search first
 
 Expense rules:
 - Debit = subtract from balance
 - Credit = add to balance  
 - If balance drops to 5000 or below, AUTOMATICALLY send a low balance alert email
-
 """
 # Deduplication: track recently sent replies per phone to prevent duplicate messages
 _last_reply: dict = {}
@@ -254,14 +263,23 @@ async def run_agent(user_message: str, phone: str, client_data: dict):
     timezone = client_data.get("timezone") or "Asia/Kolkata"
     tz = pytz.timezone(timezone)
     now = datetime.now(tz)
-    current_datetime = now.strftime("%A, %d %B %Y %I:%M %p")  
+    current_datetime = now.strftime("%A, %d %B %Y %I:%M %p")
     # Example: "Monday, 14 April 2026 10:42 AM"
 
     # Inject date into system prompt
-    dated_system_prompt = SYSTEM_PROMPT + f"\n\nCURRENT DATE AND TIME: {current_datetime}\nTimezone: {timezone}\n\nAlways use this date as 'today' when user says today/tomorrow/yesterday/next week etc. Never assume any other date."
+    dated_system_prompt = (
+        SYSTEM_PROMPT
+        + f"\n\nCURRENT DATE AND TIME: {current_datetime}"
+        + f"\nTimezone: {timezone}"
+        + "\n\nAlways use this date as 'today' when user says today/tomorrow/yesterday/next week etc. Never assume any other date."
+    )
 
+    # Save user message to Supabase immediately (before AI call)
+    # so it is persisted even if something crashes later
+    save_user_message(phone, user_message)
+
+    # Load full conversation history from Supabase
     history = get_memory(phone)
-    history.append({"role": "user", "content": user_message})
 
     # First AI call
     response = client.chat.completions.create(
@@ -322,9 +340,18 @@ async def run_agent(user_message: str, phone: str, client_data: dict):
     # Send WhatsApp reply using per-user credentials from Supabase
     await send_whatsapp_message(phone, final_text, client_data=client_data)
 
-    # Save memory (only serializable dicts)
-    history.append({"role": "assistant", "content": final_text})
-    save_memory(phone, history)
+    # Save assistant reply to Supabase
+    # (user message was already saved at the start of run_agent)
+    from agent.database import supabase as _supa
+    try:
+        _supa.table("conversations").insert({
+            "wa_phone": phone,
+            "role": "assistant",
+            "content": final_text,
+        }).execute()
+        print(f"[Memory] Saved assistant reply for {phone}")
+    except Exception as _me:
+        print(f"[Memory] Failed to save assistant reply: {_me}")
 
 
 
