@@ -14,8 +14,8 @@ Fixes applied:
   - save_memory() now saves BOTH the user message AND assistant reply
     (previously only the assistant reply was saved, so the agent had
      no user-side context in future turns)
-  - get_memory() now limits to the last 40 messages (20 turns) so the
-    context window stays healthy and the model can always see recent history
+  - get_memory() now limits to the last 500 messages (250 turns) so the
+    agent remembers a long and detailed conversation history
   - save_user_message() is still available for explicit pre-saves
 """
 
@@ -23,7 +23,7 @@ import json
 from agent.database import supabase
 
 # How many recent messages to load into context (keep last N rows)
-MAX_HISTORY = 40
+MAX_HISTORY = 500
 
 
 def get_memory(phone: str) -> list:
