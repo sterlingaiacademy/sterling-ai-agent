@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 import bcrypt
-from agent.database import get_client_by_email, create_client_account, get_client_by_mobile
-from agent.otp_service import generate_otp, send_otp_fast2sms, store_otp_data, verify_otp, clear_otp_data
+from agent.database import get_client_by_email, create_client_account
+from agent.otp_service import generate_otp, send_otp_email, store_otp_data, verify_otp, clear_otp_data
 
 router = APIRouter()
 
@@ -95,10 +95,6 @@ input:focus{border-color:var(--accent);background:white;}
         <input type="email" name="email" placeholder="you@example.com" required/>
       </div>
       <div class="form-group">
-        <label>Mobile Number (+91)</label>
-        <input type="text" name="mobile_number" placeholder="9876543210" required/>
-      </div>
-      <div class="form-group">
         <label>Password</label>
         <input type="password" name="password" placeholder="Choose a strong password" required/>
       </div>
@@ -113,7 +109,6 @@ input:focus{border-color:var(--accent);background:white;}
     document.getElementById('panel-'+t).classList.add('active');
     event.target.classList.add('active');
   }
-  // Show error from URL param
   const err = new URLSearchParams(window.location.search).get('error');
   if(err){ const el=document.getElementById('err'); el.textContent=err; el.style.display='block'; }
 </script>
@@ -143,45 +138,40 @@ async def login(request: Request):
 @router.post("/register")
 async def register(request: Request):
     form = await request.form()
-    email = form.get("email")
+    email    = form.get("email")
     password = form.get("password")
-    mobile_number = form.get("mobile_number")
 
     existing = get_client_by_email(email)
     if existing:
         return RedirectResponse("/login?error=Account+already+exists,+please+sign+in", status_code=302)
-        
-    existing_mobile = get_client_by_mobile(mobile_number)
-    if existing_mobile:
-        return RedirectResponse("/login?error=Mobile+number+already+registered", status_code=302)
 
-    # Generate and send OTP
+    # Generate OTP and email it
     otp = generate_otp()
-    sent = await send_otp_fast2sms(mobile_number, otp)
-    
+    sent = send_otp_email(email, otp)
+
     if not sent:
-        return RedirectResponse("/login?error=Failed+to+send+OTP.+Please+try+again.", status_code=302)
+        return RedirectResponse("/login?error=Failed+to+send+verification+email.+Please+try+again.", status_code=302)
 
     hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
-    store_otp_data(mobile_number, otp, email, hashed)
+    store_otp_data(email, otp, hashed)
 
-    request.session["pending_mobile"] = mobile_number
+    request.session["pending_email"] = email
     return RedirectResponse("/verify-otp", status_code=302)
 
-# ── OTP Verification ──────────────────────────────────────────────────────────
+# ── OTP Verification page (GET) ───────────────────────────────────────────────
 @router.get("/verify-otp")
 async def verify_otp_page(request: Request):
-    mobile_number = request.session.get("pending_mobile", "")
-    if not mobile_number:
+    pending_email = request.session.get("pending_email", "")
+    if not pending_email:
         return RedirectResponse("/login", status_code=302)
-        
+
     return HTMLResponse(f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Verify OTP · Sterling AI</title>
+    <title>Verify Email · Sterling AI</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
     <style>
     *,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
@@ -194,6 +184,9 @@ async def verify_otp_page(request: Request):
     .card{{background:var(--card);border:1px solid var(--border);border-radius:16px;
       padding:48px 40px;width:100%;max-width:420px;
       box-shadow:0 2px 8px rgba(26,23,20,.06),0 12px 40px rgba(26,23,20,.08);text-align:center;}}
+    .logo{{width:44px;height:44px;background:var(--accent);border-radius:10px;
+      display:inline-flex;align-items:center;justify-content:center;
+      color:white;font-size:18px;font-weight:700;margin-bottom:20px;}}
     h1{{font-family:'Playfair Display',serif;font-size:24px;color:var(--text);margin-bottom:8px;}}
     p.sub{{color:var(--muted);font-size:14px;margin-bottom:24px;line-height:1.5;}}
     strong{{color:var(--text);}}
@@ -201,8 +194,8 @@ async def verify_otp_page(request: Request):
     label{{display:block;font-size:12px;font-weight:700;text-transform:uppercase;
       letter-spacing:1px;color:var(--accent);margin-bottom:6px;}}
     input{{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;
-      font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;text-align:center;
-      color:var(--text);background:var(--bg);outline:none;transition:border-color .2s;letter-spacing:4px;}}
+      font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;text-align:center;
+      color:var(--text);background:var(--bg);outline:none;transition:border-color .2s;letter-spacing:8px;}}
     input:focus{{border-color:var(--accent);background:white;}}
     .btn{{width:100%;padding:13px;background:var(--accent);color:white;border:none;
       border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;
@@ -214,14 +207,16 @@ async def verify_otp_page(request: Request):
     </head>
     <body>
     <div class="card">
-      <h1>Verify your number</h1>
-      <p class="sub">We sent a 6-digit code to <strong>{mobile_number}</strong>.</p>
-      
+      <div class="logo">S</div>
+      <h1>Check your email</h1>
+      <p class="sub">We sent a 6-digit code to <strong>{pending_email}</strong>.<br/>Enter it below to complete registration.</p>
+
       <div id="err" class="error"></div>
-      
+
       <form method="POST" action="/verify-otp">
         <div class="form-group">
-          <input type="text" name="otp" placeholder="••••••" maxlength="6" required autocomplete="off"/>
+          <label>Verification Code</label>
+          <input type="text" name="otp" placeholder="······" maxlength="6" required autocomplete="one-time-code"/>
         </div>
         <button class="btn" type="submit">Verify & Continue →</button>
       </form>
@@ -234,27 +229,28 @@ async def verify_otp_page(request: Request):
     </html>
     """)
 
+# ── OTP Verification POST ─────────────────────────────────────────────────────
 @router.post("/verify-otp")
 async def verify_otp_post(request: Request):
-    form = await request.form()
+    form        = await request.form()
     otp_attempt = form.get("otp", "").strip()
-    mobile_number = request.session.get("pending_mobile")
-    
-    if not mobile_number:
+    pending_email = request.session.get("pending_email")
+
+    if not pending_email:
         return RedirectResponse("/login?error=Session+expired.+Please+register+again.", status_code=302)
-        
-    record = verify_otp(mobile_number, otp_attempt)
+
+    record = verify_otp(pending_email, otp_attempt)
     if not record:
         return RedirectResponse("/verify-otp?error=Invalid+or+expired+code", status_code=302)
-        
-    # Success - create the user
-    client = create_client_account(record["email"], record["password_hash"], mobile_number)
-    clear_otp_data(mobile_number)
-    
-    request.session.pop("pending_mobile", None)
-    request.session["client_email"] = record["email"]
-    request.session["client_id"] = client["id"]
-    
+
+    # Create the account
+    client = create_client_account(pending_email, record["password_hash"])
+    clear_otp_data(pending_email)
+
+    request.session.pop("pending_email", None)
+    request.session["client_email"] = pending_email
+    request.session["client_id"]    = client["id"]
+
     return RedirectResponse("/setup", status_code=302)
 
 # ── Logout ────────────────────────────────────────────────────────────────────

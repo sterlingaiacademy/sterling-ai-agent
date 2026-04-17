@@ -1,90 +1,100 @@
 import os
 import random
 import time
-import httpx
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
-# In-memory store for OTPs. 
-# Format: { "mobile_number": {"otp": "123456", "expires_at": 1690000000, "email": "...", "password": "..."} }
-# Note: In production with multiple workers, use Redis or DB instead.
-_otp_store = {}
+# In-memory OTP store keyed by email
+# { "user@email.com": { "otp": "123456", "password_hash": "...", "expires_at": 1234 } }
+_otp_store: dict = {}
+
 
 def generate_otp() -> str:
     """Generate a 6-digit OTP."""
     return str(random.randint(100000, 999999))
 
-async def send_otp_fast2sms(mobile_number: str, otp: str) -> bool:
-    """
-    Send an OTP via Fast2SMS DLT route or standard routing.
-    Note: 'variables_values' is the standard way to pass OTP in Fast2SMS V3 API.
-    """
-    api_key = os.getenv("FAST2SMS_API_KEY")
-    if not api_key:
-        print("[OTPService] ERROR: FAST2SMS_API_KEY is not set.")
+
+def send_otp_email(email: str, otp: str) -> bool:
+    """Send a 6-digit OTP to the user's email via Gmail SMTP."""
+    smtp_email    = os.getenv("SMTP_EMAIL")
+    smtp_password = os.getenv("SMTP_PASSWORD")
+
+    if not smtp_email or not smtp_password:
+        print("[OTPService] ERROR: SMTP_EMAIL or SMTP_PASSWORD not set.")
         return False
-        
-    url = "https://www.fast2sms.com/dev/bulkV2"
-    
-    # Clean the mobile number. Fast2SMS expects a 10-digit number without country code
-    # if sending to India directly via Quick transactional route.
-    clean_number = mobile_number.replace("+91", "").replace("-", "").replace(" ", "").strip()
-    if len(clean_number) > 10 and clean_number.startswith("91"):
-        clean_number = clean_number[2:]
 
-    payload = {
-        "route": "otp",
-        "variables_values": otp,
-        "numbers": clean_number
-    }
-    
-    headers = {
-        "authorization": api_key,
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-
-    print(f"[OTPService] Sending OTP {otp} to {clean_number} via Fast2SMS...")
-    
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(url, data=payload, headers=headers)
-            data = response.json()
-            if data.get("return") == True:
-                print("[OTPService] OTP sent successfully.")
-                return True
-            else:
-                print(f"[OTPService] Fast2SMS Error: {data}")
-                return False
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = "Your Sterling AI verification code"
+        msg["From"]    = f"Sterling AI <{smtp_email}>"
+        msg["To"]      = email
+
+        html = f"""
+        <div style="font-family:'Plus Jakarta Sans',Arial,sans-serif;max-width:480px;
+                    margin:0 auto;background:#f4f1ec;padding:40px 20px;">
+          <div style="background:#fff;border-radius:16px;padding:40px;
+                      box-shadow:0 4px 24px rgba(0,0,0,.08);text-align:center;">
+            <div style="width:48px;height:48px;background:#1a3a2a;border-radius:10px;
+                        display:inline-flex;align-items:center;justify-content:center;
+                        color:#fff;font-size:22px;font-weight:700;margin-bottom:20px;">S</div>
+            <h2 style="font-size:22px;color:#1a1714;margin:0 0 8px;">
+              Verify your email
+            </h2>
+            <p style="color:#6b6358;font-size:14px;margin:0 0 32px;">
+              Use the code below to complete your Sterling AI registration.
+              It expires in <strong>10 minutes</strong>.
+            </p>
+            <div style="background:#f4f1ec;border-radius:12px;padding:24px;
+                        font-size:36px;font-weight:700;letter-spacing:12px;
+                        color:#1a3a2a;margin-bottom:32px;">
+              {otp}
+            </div>
+            <p style="color:#6b6358;font-size:12px;margin:0;">
+              If you didn't request this, you can safely ignore this email.
+            </p>
+          </div>
+        </div>
+        """
+
+        msg.attach(MIMEText(html, "html"))
+
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(smtp_email, smtp_password)
+            server.sendmail(smtp_email, email, msg.as_string())
+
+        print(f"[OTPService] OTP sent to {email}")
+        return True
+
     except Exception as e:
-        print(f"[OTPService] Exception while sending OTP: {str(e)}")
+        print(f"[OTPService] Email send error: {e}")
         return False
 
-def store_otp_data(mobile_number: str, otp: str, email: str, password_hash: str):
-    """Store the OTP and pending user details temporarily for 10 minutes."""
-    _otp_store[mobile_number] = {
-        "otp": otp,
-        "email": email,
+
+def store_otp_data(email: str, otp: str, password_hash: str):
+    """Store OTP + password hash temporarily for 10 minutes."""
+    _otp_store[email] = {
+        "otp":           otp,
         "password_hash": password_hash,
-        "expires_at": time.time() + 600  # 10 minutes
+        "expires_at":    time.time() + 600
     }
 
-def verify_otp(mobile_number: str, otp_attempt: str) -> dict:
-    """
-    Verify the OTP. Returns the stored data if correct, or None if invalid/expired.
-    """
-    record = _otp_store.get(mobile_number)
+
+def verify_otp(email: str, otp_attempt: str) -> dict | None:
+    """Verify OTP. Returns stored record if correct, None if invalid/expired."""
+    record = _otp_store.get(email)
     if not record:
         return None
-        
     if time.time() > record["expires_at"]:
-        del _otp_store[mobile_number]
+        del _otp_store[email]
         return None
-        
     if record["otp"] == otp_attempt:
-        # We don't delete yet, let the auth_middleware delete it upon DB insertion success
         return record
-        
     return None
 
-def clear_otp_data(mobile_number: str):
-    """Clean up after successful registration."""
-    if mobile_number in _otp_store:
-        del _otp_store[mobile_number]
+
+def clear_otp_data(email: str):
+    """Remove OTP record after successful registration."""
+    _otp_store.pop(email, None)
