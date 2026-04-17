@@ -18,11 +18,6 @@ app = FastAPI(title="Sterling AI Assistant")
 # ── Message deduplication to prevent WhatsApp webhook retries from firing twice ─
 _processed_message_ids: set = set()
 
-app.add_middleware(
-    SessionMiddleware,
-    secret_key=os.getenv("SESSION_SECRET", "sterling-secret-change-this")
-)
-
 # ── Routers ────────────────────────────────────────────────────────────────────
 app.include_router(login_router)
 app.include_router(auth_router)
@@ -52,6 +47,15 @@ async def auth_guard(request: Request, call_next):
             return RedirectResponse(url="/login", status_code=302)
 
     return await call_next(request)
+
+
+# ── Session middleware (must be added AFTER auth_guard so it wraps it) ─────────
+# In Starlette, the LAST middleware added is outermost (runs first on request).
+# SessionMiddleware must run first so request.session is populated before auth_guard.
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SESSION_SECRET", "sterling-secret-change-this")
+)
 
 
 # ── WhatsApp webhook verification ─────────────────────────────────────────────
