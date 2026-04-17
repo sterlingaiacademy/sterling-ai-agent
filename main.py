@@ -43,7 +43,7 @@ async def auth_guard(request: Request, call_next):
     protected = ["/setup", "/auth/google", "/auth/status"]
     path = request.url.path
 
-    public = ["/login", "/logout", "/webhook", "/auth/callback", "/docs", "/openapi"]
+    public = ["/login", "/register", "/verify-otp", "/logout", "/webhook", "/auth/callback", "/docs", "/openapi"]
     if any(path.startswith(p) for p in public):
         return await call_next(request)
 

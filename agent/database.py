@@ -23,11 +23,19 @@ def save_google_token(client_id: str, token_json: str):
 def update_client(client_id: str, data: dict):
     supabase.table("clients").update(data).eq("id", client_id).execute()
 
-def create_client_account(email: str, password_hash: str):
-    result = supabase.table("clients").insert({
+def get_client_by_mobile(mobile_number: str):
+    result = supabase.table("clients").select("*").eq("mobile_number", mobile_number).execute()
+    return result.data[0] if result.data else None
+
+def create_client_account(email: str, password_hash: str, mobile_number: str = None):
+    data = {
         "email": email,
         "password_hash": password_hash
-    }).execute()
+    }
+    if mobile_number:
+        data["mobile_number"] = mobile_number
+        
+    result = supabase.table("clients").insert(data).execute()
     return result.data[0]
 def save_pending_audio(wa_phone: str, audio_url: str):
     supabase.table("clients").update({
