@@ -14,4 +14,4 @@ itsdangerous
 starlette[full]
 pytz
 httpx
-ddgs
+duckduckgo-search
