@@ -2,1053 +2,572 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Sterling AI Assistant · Setup</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Sterling AI · Luxury Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg-dark: #070709;
+  --bg-panel: rgba(18, 18, 22, 0.7);
+  --gold: #d4af37;
+  --gold-glow: rgba(212, 175, 55, 0.3);
+  --gold-dim: #a38221;
+  --text-main: #f5f5f7;
+  --text-muted: #a1a1aa;
+  --border: rgba(212, 175, 55, 0.15);
+  --border-glow: rgba(212, 175, 55, 0.4);
+  --accent: #1e1e24;
+  --success: #2e7d32;
+  --success-bg: rgba(46, 125, 50, 0.15);
+  --error: #d32f2f;
+  --error-bg: rgba(211, 47, 47, 0.15);
+  --shadow-gold: 0 8px 32px rgba(212, 175, 55, 0.08);
+  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+body { background: var(--bg-dark); color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+body::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.03) 0%, transparent 60%); z-index: -1; pointer-events: none; }
 
-:root{
-  --bg:#f4f1ec;
-  --bg2:#ede9e1;
-  --card:#ffffff;
-  --border:#d4cec4;
-  --border2:#b8b0a4;
-  --text:#1a1714;
-  --text2:#3d3830;
-  --muted:#6b6358;
-  --faint:#9e9690;
-  --accent:#1a3a2a;
-  --accent2:#b8860b;
-  --accent3:#2d5a3d;
-  --accent-l:#e8f0eb;
-  --ok:#1a3a2a;
-  --ok-l:#e8f0eb;
-  --err:#7a1f1f;
-  --err-l:#fdf0f0;
-  --warn:#6b4a00;
-  --warn-l:#fdf6e3;
-  --shadow:0 2px 8px rgba(26,23,20,.06),0 12px 40px rgba(26,23,20,.08);
-}
+/* NAV */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; background: rgba(7, 7, 9, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.nav-brand { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+.nav-logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dim)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 800; font-size: 20px; font-family: 'Cormorant Garamond', serif; box-shadow: 0 4px 15px var(--gold-glow); }
+.nav-name { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 700; color: var(--gold); letter-spacing: 0.5px; }
+.nav-links { display: flex; align-items: center; gap: 8px; }
+.nav-link { padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: all 0.3s ease; border: 1px solid transparent; background: transparent; }
+.nav-link:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
+.nav-link.active { color: var(--gold); background: rgba(212, 175, 55, 0.1); border-color: var(--border); box-shadow: 0 0 15px rgba(212, 175, 55, 0.05); }
+.nav-out { padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; color: rgba(255,100,100,0.8); cursor: pointer; border: 1px solid transparent; background: none; text-decoration: none; transition: 0.3s; }
+.nav-out:hover { background: rgba(255,100,100,0.1); color: #ff6b6b; border-color: rgba(255,100,100,0.2); }
 
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:'Plus Jakarta Sans',sans-serif;
-  min-height:100vh;
-  overflow-x:hidden;
-}
+/* MOBILE MENU TOGGLE */
+.menu-toggle { display: none; background: none; border: none; color: var(--gold); font-size: 24px; cursor: pointer; }
 
-/* ── TOP NAV ─────────────────────────────── */
-.topnav{
-  position:fixed;top:0;left:0;right:0;z-index:100;
-  background:rgba(244,241,236,.92);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--border);
-  padding:0 40px;
-  height:60px;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.nav-brand{
-  display:flex;align-items:center;gap:10px;
-  font-weight:700;font-size:15px;color:var(--accent);letter-spacing:-.2px;
-}
-.nav-logo{
-  width:32px;height:32px;
-  background:var(--accent);
-  border-radius:8px;
-  display:flex;align-items:center;justify-content:center;
-  color:white;font-size:14px;font-weight:700;
-}
-.nav-links{display:flex;gap:6px;}
-.nav-link{
-  padding:6px 14px;border-radius:6px;font-size:13px;font-weight:500;
-  color:var(--muted);cursor:pointer;transition:all .2s;border:none;background:none;
-}
-.nav-link:hover{background:var(--bg2);color:var(--text);}
-.nav-link.active{background:var(--accent);color:white;}
+/* PAGES */
+.page { display: none; padding-top: 90px; min-height: 100vh; animation: fadeIn 0.5s ease; padding-bottom: 60px; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ── LAYOUT ──────────────────────────────── */
-.page{display:none;padding-top:60px;min-height:100vh;}
-.page.active{display:block;}
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 28px; border-radius: 12px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.3s ease; letter-spacing: 0.5px; text-decoration: none; }
+.btn-gold { background: linear-gradient(135deg, var(--gold), var(--gold-dim)); color: #000; box-shadow: 0 4px 15px var(--gold-glow); }
+.btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--border-glow); }
+.btn-outline { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
+.btn-outline:hover { background: rgba(212, 175, 55, 0.1); box-shadow: 0 0 15px var(--gold-glow); }
+.btn-glass { background: rgba(255, 255, 255, 0.03); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
+.btn-glass:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--gold); }
+.btn-disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
 
-/* ── HERO (setup page) ───────────────────── */
-.hero{
-  padding:64px 40px 48px;
-  max-width:1100px;margin:0 auto;
-  display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;
-}
-.hero-left{}
-.hero-eyebrow{
-  display:inline-flex;align-items:center;gap:8px;
-  background:var(--accent-l);border:1px solid rgba(26,58,42,.2);
-  color:var(--accent);border-radius:20px;padding:5px 14px;
-  font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
-  margin-bottom:20px;
-}
-.hero-eyebrow span{width:6px;height:6px;border-radius:50%;background:var(--accent3);}
-.hero h1{
-  font-family:'Playfair Display',serif;
-  font-size:52px;font-weight:700;line-height:1.08;
-  letter-spacing:-.5px;color:var(--text);margin-bottom:16px;
-}
-.hero h1 em{font-style:italic;color:var(--accent3);}
-.hero-desc{
-  font-size:15px;color:var(--muted);line-height:1.75;
-  font-weight:400;margin-bottom:32px;
-}
-.hero-cta{
-  display:flex;gap:12px;flex-wrap:wrap;
-}
-.hero-right{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:16px;padding:28px;box-shadow:var(--shadow);
-}
-.mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
-.mini-stat{
-  background:var(--bg);border:1px solid var(--border);
-  border-radius:10px;padding:16px;
-}
-.mini-stat .ms-icon{font-size:20px;margin-bottom:6px;}
-.mini-stat .ms-val{font-size:20px;font-weight:700;color:var(--text);line-height:1;}
-.mini-stat .ms-lbl{font-size:11px;color:var(--muted);margin-top:3px;font-weight:500;}
-.activity-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--faint);margin-bottom:12px;}
-.activity-item{
-  display:flex;align-items:center;gap:10px;
-  padding:9px 0;border-bottom:1px solid var(--border);
-  font-size:13px;
-}
-.activity-item:last-child{border-bottom:none;}
-.ai-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.ai-dot.green{background:#22c55e;}
-.ai-dot.amber{background:#f59e0b;}
-.ai-dot.blue{background:#3b82f6;}
-.ai-text{color:var(--text2);font-weight:500;flex:1;}
-.ai-time{color:var(--faint);font-size:11px;}
+/* HERO SECTION */
+.hero { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 900px; margin: 0 auto 60px; padding: 40px 20px; }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(212, 175, 55, 0.08); border: 1px solid var(--border); border-radius: 30px; padding: 8px 20px; margin-bottom: 24px; color: var(--gold); font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
+.hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: pulse 2s infinite; }
+.hero h1 { font-family: 'Cormorant Garamond', serif; font-size: 64px; line-height: 1.1; font-weight: 600; margin-bottom: 24px; text-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+.hero h1 em { font-style: italic; color: var(--gold); }
+.hero p { font-size: 16px; color: var(--text-muted); line-height: 1.8; margin-bottom: 40px; max-width: 600px; }
+@keyframes pulse { 0% { opacity: 1; box-shadow: 0 0 0 0 var(--gold-glow); } 70% { opacity: 0.5; box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); } 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); } }
 
-/* ── PROGRESS BAR ────────────────────────── */
-.progress-bar{
-  background:var(--bg2);border-bottom:1px solid var(--border);
-  padding:0 40px;
-}
-.progress-inner{
-  max-width:800px;margin:0 auto;
-  display:flex;align-items:stretch;
-}
-.prog-step{
-  flex:1;display:flex;align-items:center;gap:12px;
-  padding:16px 0;position:relative;cursor:pointer;
-}
-.prog-step::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;
-  height:2px;background:transparent;transition:background .3s;
-}
-.prog-step.active::after{background:var(--accent);}
-.prog-step.done::after{background:var(--accent3);}
-.prog-num{
-  width:28px;height:28px;border-radius:50%;
-  border:1.5px solid var(--border2);
-  display:flex;align-items:center;justify-content:center;
-  font-size:12px;font-weight:700;color:var(--faint);
-  background:var(--card);flex-shrink:0;transition:all .3s;
-}
-.prog-step.active .prog-num{border-color:var(--accent);color:var(--accent);background:var(--accent-l);}
-.prog-step.done .prog-num{border-color:var(--accent3);background:var(--accent3);color:white;}
-.prog-info{}
-.prog-label{font-size:12px;font-weight:700;color:var(--faint);transition:color .3s;letter-spacing:.2px;}
-.prog-step.active .prog-label{color:var(--accent);}
-.prog-step.done .prog-label{color:var(--accent3);}
-.prog-sub{font-size:11px;color:var(--faint);font-weight:400;}
-.prog-divider{width:1px;background:var(--border);margin:12px 0;align-self:stretch;}
+/* SETUP PROGRESS */
+.prog-container { max-width: 860px; margin: 0 auto 40px; }
+.prog-inner { display: flex; align-items: center; justify-content: space-between; background: var(--bg-panel); padding: 20px 40px; border-radius: 16px; border: 1px solid var(--border); backdrop-filter: blur(10px); box-shadow: var(--shadow-glass); }
+.prog-step { display: flex; align-items: center; gap: 16px; cursor: pointer; position: relative; flex: 1; }
+.prog-num { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--text-muted); background: rgba(0,0,0,0.5); transition: all 0.3s; z-index: 2; }
+.prog-text { display: flex; flex-direction: column; }
+.prog-label { font-size: 14px; font-weight: 600; color: var(--text-muted); transition: color 0.3s; }
+.prog-sub { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+.prog-step.active .prog-num { border-color: var(--gold); color: #000; background: var(--gold); box-shadow: 0 0 15px var(--gold-glow); }
+.prog-step.active .prog-label { color: var(--gold); }
+.prog-step.done .prog-num { border-color: var(--gold); color: var(--gold); background: rgba(212, 175, 55, 0.1); }
+.prog-line { height: 1px; background: rgba(255,255,255,0.1); flex: 1; margin: 0 20px; position: relative; }
 
-/* ── SETUP PANELS ────────────────────────── */
-.setup-wrap{max-width:800px;margin:0 auto;padding:40px;}
-.setup-panel{display:none;}
-.setup-panel.active{display:block;}
+/* SETUP PANELS */
+.setup-wrap { max-width: 760px; margin: 0 auto; }
+.setup-panel { display: none; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 20px; padding: 48px; backdrop-filter: blur(20px); box-shadow: var(--shadow-glass); }
+.setup-panel.active { display: block; animation: slideUp 0.5s ease; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Panel header */
-.sp-header{margin-bottom:36px;}
-.sp-step-tag{
-  display:inline-block;
-  background:var(--accent);color:white;
-  font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
-  padding:4px 12px;border-radius:4px;margin-bottom:14px;
-}
-.sp-header h2{
-  font-family:'Playfair Display',serif;
-  font-size:34px;font-weight:700;color:var(--text);
-  letter-spacing:-.3px;margin-bottom:8px;
-}
-.sp-header p{font-size:14.5px;color:var(--muted);line-height:1.7;max-width:560px;}
+.sp-header { margin-bottom: 40px; text-align: center; }
+.sp-header h2 { font-family: 'Cormorant Garamond', serif; font-size: 36px; color: var(--gold); margin-bottom: 12px; }
+.sp-header p { color: var(--text-muted); font-size: 15px; line-height: 1.6; }
 
-/* Google connection card */
-.g-connect-card{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:12px;overflow:hidden;margin-bottom:28px;
-  box-shadow:0 2px 12px rgba(26,23,20,.05);
-}
-.gcc-header{
-  padding:20px 24px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:16px;
-}
-.gcc-icon{
-  width:44px;height:44px;border-radius:10px;
-  background:white;border:1px solid var(--border);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
-.gcc-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:2px;}
-.gcc-sub{font-size:13px;color:var(--muted);}
-.gcc-status{
-  margin-left:auto;display:flex;align-items:center;gap:6px;
-  font-size:12px;font-weight:600;color:var(--faint);
-  background:var(--bg2);border:1px solid var(--border);
-  padding:5px 12px;border-radius:20px;
-}
-.gcc-status.ok{background:var(--ok-l);border-color:rgba(26,58,42,.2);color:var(--ok);}
-.gcc-status .dot{width:6px;height:6px;border-radius:50%;background:var(--faint);}
-.gcc-status.ok .dot{background:var(--accent3);}
-.gcc-perms{
-  padding:16px 24px;display:flex;gap:12px;flex-wrap:wrap;
-}
-.perm-chip{
-  display:inline-flex;align-items:center;gap:6px;
-  background:var(--bg);border:1px solid var(--border);
-  border-radius:20px;padding:5px 12px;font-size:12px;font-weight:500;color:var(--text2);
-}
-.perm-chip svg{flex-shrink:0;}
-.gcc-actions{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:12px;}
+/* FORM FIELDS */
+.form-group { margin-bottom: 24px; }
+.form-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; }
+.form-badge { background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px; font-size: 10px; color: var(--gold); border: 1px solid var(--border); }
+.form-input { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 14px 16px; color: var(--text-main); font-family: inherit; font-size: 15px; transition: all 0.3s; }
+.form-input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 10px var(--gold-glow); background: rgba(0,0,0,0.6); }
+.form-input::placeholder { color: rgba(255,255,255,0.2); }
+.form-hint { font-size: 12px; color: var(--text-muted); margin-top: 8px; display: flex; gap: 8px; align-items: flex-start; }
+.form-hint i { color: var(--gold); font-style: normal; }
+.form-hint a { color: var(--gold); text-decoration: none; border-bottom: 1px solid transparent; transition: 0.3s; }
+.form-hint a:hover { border-bottom-color: var(--gold); }
 
-/* Field cards — new dynamic style */
-.field-card{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:12px;margin-bottom:16px;overflow:hidden;
-  box-shadow:0 1px 4px rgba(26,23,20,.04);
-  transition:border-color .2s,box-shadow .2s;
-}
-.field-card:focus-within{
-  border-color:var(--accent);
-  box-shadow:0 0 0 3px rgba(26,58,42,.08),0 4px 16px rgba(26,23,20,.08);
-}
-.fc-top{
-  padding:14px 20px 0;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.fc-label{
-  font-size:11px;font-weight:700;text-transform:uppercase;
-  letter-spacing:1.2px;color:var(--accent);
-}
-.fc-badge{
-  font-size:10px;font-weight:600;letter-spacing:.5px;
-  background:var(--bg2);color:var(--muted);
-  border-radius:4px;padding:2px 8px;
-}
-.fc-badge.required{background:#fdf6e3;color:var(--warn);}
-.fc-input{
-  width:100%;border:none;outline:none;
-  background:transparent;
-  font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:15px;font-weight:500;color:var(--text);
-  padding:10px 20px 12px;
-}
-.fc-input::placeholder{color:var(--faint);font-weight:400;}
-.fc-divider{height:1px;background:var(--border);margin:0 20px;}
-.fc-guide{
-  padding:12px 20px;
-  display:flex;gap:10px;align-items:flex-start;
-}
-.fc-guide-icon{
-  width:20px;height:20px;border-radius:5px;
-  background:var(--bg2);display:flex;align-items:center;
-  justify-content:center;flex-shrink:0;font-size:11px;margin-top:1px;
-}
-.fc-guide-text{font-size:12px;color:var(--muted);line-height:1.6;font-weight:400;}
-.fc-guide-text strong{color:var(--text2);font-weight:600;}
-.fc-guide-text a{color:var(--accent3);text-decoration:none;font-weight:600;}
-.fc-guide-text a:hover{text-decoration:underline;}
+/* GOOGLE CONNECT CARD */
+.g-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 24px; margin-bottom: 30px; display: flex; flex-direction: column; gap: 20px; }
+.g-header { display: flex; align-items: center; justify-content: space-between; }
+.g-info { display: flex; align-items: center; gap: 16px; }
+.g-icon { width: 48px; height: 48px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.g-text h3 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.g-text p { font-size: 13px; color: var(--text-muted); }
+.g-status { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); }
+.g-status.connected { background: var(--success-bg); color: #4caf50; border-color: rgba(76, 175, 80, 0.3); }
 
-/* Section group */
-.section-group{margin-bottom:32px;}
-.sg-title{
-  font-size:12px;font-weight:700;text-transform:uppercase;
-  letter-spacing:1.5px;color:var(--accent2);
-  margin-bottom:16px;display:flex;align-items:center;gap:10px;
-}
-.sg-title::after{content:'';flex:1;height:1px;background:var(--border);}
+/* VERIFICATION BOX */
+.verify-box { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; margin-top: 30px; display: none; }
+.verify-box.active { display: block; }
+.v-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.v-row:last-child { border: none; }
+.v-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 12px; }
+.v-icon.loading { border: 2px solid transparent; border-top-color: var(--gold); border-left-color: var(--gold); animation: spin 1s linear infinite; }
+.v-icon.ok { background: var(--success-bg); color: #4caf50; }
+.v-icon.err { background: var(--error-bg); color: #f44336; }
+.v-text { font-size: 14px; color: var(--text-main); }
+.v-sub { font-size: 12px; color: var(--text-muted); }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* Verify results */
-.verify-box{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:12px;overflow:hidden;margin:20px 0;
-  display:none;
-}
-.verify-box.show{display:block;}
-.vb-header{
-  padding:12px 20px;background:var(--bg2);
-  border-bottom:1px solid var(--border);
-  font-size:11px;font-weight:700;text-transform:uppercase;
-  letter-spacing:1.5px;color:var(--muted);
-  display:flex;align-items:center;justify-content:space-between;
-}
-.vb-row{
-  display:flex;align-items:flex-start;gap:14px;
-  padding:14px 20px;border-bottom:1px solid var(--border);
-}
-.vb-row:last-child{border-bottom:none;}
-.vb-icon{
-  width:28px;height:28px;border-radius:8px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:13px;flex-shrink:0;margin-top:1px;
-}
-.vb-icon.ok{background:var(--ok-l);color:var(--ok);}
-.vb-icon.err{background:var(--err-l);color:var(--err);}
-.vb-icon.loading{background:var(--bg2);color:var(--faint);}
-.vb-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px;}
-.vb-msg{font-size:12px;color:var(--muted);line-height:1.5;}
-.vb-msg.ok{color:var(--ok);}
-.vb-msg.err{color:var(--err);}
+/* ALERTS */
+.alert { padding: 16px; border-radius: 10px; font-size: 14px; margin-bottom: 24px; display: none; align-items: center; gap: 12px; }
+.alert.active { display: flex; }
+.alert-error { background: var(--error-bg); border: 1px solid rgba(211,47,47,0.3); color: #ff8a80; }
+.alert-success { background: var(--success-bg); border: 1px solid rgba(46,125,50,0.3); color: #81c784; }
 
-/* Buttons */
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  padding:12px 24px;border-radius:8px;
-  font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:13px;font-weight:700;letter-spacing:.3px;
-  cursor:pointer;border:none;transition:all .2s ease;
-  white-space:nowrap;
-}
-.btn-primary{background:var(--accent);color:white;}
-.btn-primary:hover:not(:disabled){background:#0f2a1c;box-shadow:0 4px 16px rgba(26,58,42,.3);transform:translateY(-1px);}
-.btn-primary:disabled{background:var(--border2);color:var(--faint);cursor:not-allowed;transform:none;}
-.btn-outline{background:transparent;color:var(--accent);border:1.5px solid var(--accent);}
-.btn-outline:hover{background:var(--accent-l);}
-.btn-ghost{background:var(--bg2);color:var(--text2);border:1px solid var(--border);}
-.btn-ghost:hover{background:var(--bg);border-color:var(--border2);}
-.btn-google{background:white;color:var(--text);border:1.5px solid var(--border2);}
-.btn-google:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.1);}
-.btn-verify{
-  width:100%;background:var(--bg2);
-  color:var(--accent);border:1.5px solid rgba(26,58,42,.3);
-  margin-top:4px;
-}
-.btn-verify:hover:not(:disabled){background:var(--accent-l);border-color:var(--accent);}
-.btn-verify:disabled{opacity:.5;cursor:not-allowed;}
-.btn-lg{padding:14px 32px;font-size:14px;}
-.btn-row{display:flex;gap:12px;margin-top:24px;align-items:center;}
+/* ACTION BAR */
+.action-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); }
 
-/* Alert */
-.alert{display:none;padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:16px;line-height:1.5;font-weight:500;}
-.alert.show{display:block;}
-.alert-ok{background:var(--ok-l);border:1px solid rgba(26,58,42,.2);color:var(--ok);}
-.alert-err{background:var(--err-l);border:1px solid rgba(122,31,31,.2);color:var(--err);}
+/* FEATURES GRID (12 Tools) */
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
+.feature-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px; padding: 30px; transition: all 0.4s ease; display: flex; flex-direction: column; gap: 16px; position: relative; overflow: hidden; }
+.feature-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, transparent 100%); opacity: 0; transition: 0.4s; z-index: 0; }
+.feature-card:hover { transform: translateY(-5px); border-color: var(--border-glow); box-shadow: var(--shadow-gold); }
+.feature-card:hover::before { opacity: 1; }
+.fc-content { position: relative; z-index: 1; }
+.fc-icon { width: 50px; height: 50px; background: rgba(212, 175, 55, 0.1); border: 1px solid var(--border); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--gold); margin-bottom: 20px; }
+.fc-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600; color: var(--gold); margin-bottom: 10px; }
+.fc-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
 
-/* Spin */
-.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:rotate .7s linear infinite;display:none;flex-shrink:0;}
-.spin-dark{border-color:rgba(26,58,42,.2);border-top-color:var(--accent);}
+/* PRICING TIERS */
+.pricing-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; max-width: 1200px; margin: 0 auto; }
+.tier-card { flex: 1; min-width: 260px; max-width: 320px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 20px; padding: 40px 30px; display: flex; flex-direction: column; position: relative; overflow: hidden; backdrop-filter: blur(10px); }
+.tier-card.featured { border-color: var(--gold); box-shadow: 0 0 30px var(--gold-glow); transform: scale(1.05); }
+.tier-card.vip { background: linear-gradient(180deg, rgba(10,10,12,0.9) 0%, rgba(30,25,10,0.9) 100%); border-color: var(--gold); }
+.tier-badge { position: absolute; top: 20px; right: 20px; background: rgba(212, 175, 55, 0.2); color: var(--gold); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--gold); text-transform: uppercase; letter-spacing: 1px; }
+.tier-name { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: #fff; margin-bottom: 8px; }
+.tier-price { font-size: 36px; font-weight: 700; color: var(--gold); margin-bottom: 20px; }
+.tier-price span { font-size: 14px; font-weight: 400; color: var(--text-muted); }
+.tier-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 30px; line-height: 1.6; }
+.tier-features { flex: 1; list-style: none; margin-bottom: 40px; }
+.tier-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-main); margin-bottom: 16px; }
+.tier-features li i { color: var(--gold); font-style: normal; font-weight: bold; }
 
-/* ── SUCCESS ─────────────────────────────── */
-.success-page{
-  max-width:700px;margin:0 auto;padding:60px 40px;text-align:center;
-}
-.success-seal{
-  width:80px;height:80px;border-radius:50%;
-  border:2px solid var(--accent3);
-  background:var(--ok-l);
-  display:flex;align-items:center;justify-content:center;
-  font-size:32px;color:var(--accent3);
-  margin:0 auto 28px;
-  animation:pop .6s cubic-bezier(.34,1.56,.64,1) both;
-}
-.success-page h2{
-  font-family:'Playfair Display',serif;
-  font-size:40px;font-weight:700;color:var(--text);margin-bottom:10px;
-}
-.success-page .sub{font-size:15px;color:var(--muted);margin-bottom:40px;line-height:1.7;}
-.services-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:36px;}
-.svc-badge{
-  display:flex;align-items:center;gap:8px;
-  background:var(--card);border:1px solid var(--border);
-  border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;color:var(--text2);
-}
-.svc-dot{width:8px;height:8px;border-radius:50%;background:var(--accent3);}
-.try-card{
-  background:var(--card);border:1px solid var(--border);
-  border-left:3px solid var(--accent2);
-  border-radius:8px;padding:20px 24px;text-align:left;margin-bottom:28px;
-}
-.try-card .tc-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent2);margin-bottom:12px;}
-.try-card .tc-msg{font-family:monospace;font-size:13px;color:var(--muted);line-height:2;}
+/* GUIDE */
+.guide-content { max-width: 800px; margin: 0 auto; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 20px; padding: 50px; line-height: 1.8; color: var(--text-muted); }
+.guide-content h2 { font-family: 'Cormorant Garamond', serif; font-size: 32px; color: var(--gold); margin-bottom: 20px; margin-top: 40px; }
+.guide-content h2:first-child { margin-top: 0; }
+.guide-content strong { color: var(--text-main); }
+.guide-content ol { padding-left: 20px; margin-bottom: 20px; }
+.guide-content li { margin-bottom: 10px; }
 
-/* ── GUIDE PAGE ──────────────────────────── */
-.guide-page{max-width:900px;margin:0 auto;padding:40px;}
-.guide-hero{
-  background:var(--accent);border-radius:16px;
-  padding:40px;margin-bottom:36px;color:white;
-  position:relative;overflow:hidden;
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .hero h1 { font-size: 48px; }
+  .prog-container { display: none; }
+  .setup-panel { padding: 30px 20px; }
+  .nav { padding: 0 20px; }
+  .tier-card.featured { transform: scale(1); }
 }
-.guide-hero::before{
-  content:'';position:absolute;right:-60px;top:-60px;
-  width:300px;height:300px;border-radius:50%;
-  background:rgba(255,255,255,.05);
+@media (max-width: 600px) {
+  .nav-links { display: none; position: absolute; top: 72px; left: 0; right: 0; background: var(--bg-dark); flex-direction: column; padding: 20px; border-bottom: 1px solid var(--border); }
+  .nav-links.show { display: flex; }
+  .menu-toggle { display: block; }
+  .g-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+  .action-bar { flex-direction: column-reverse; gap: 20px; }
+  .action-bar .btn { width: 100%; }
 }
-.guide-hero h2{font-family:'Playfair Display',serif;font-size:32px;margin-bottom:8px;}
-.guide-hero p{font-size:14px;opacity:.8;line-height:1.7;max-width:500px;}
-.guide-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
-.guide-card{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:12px;overflow:hidden;
-  box-shadow:0 2px 12px rgba(26,23,20,.05);
-}
-.gc-header{
-  padding:18px 20px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:12px;
-}
-.gc-num{
-  width:32px;height:32px;border-radius:8px;
-  background:var(--accent);color:white;
-  display:flex;align-items:center;justify-content:center;
-  font-size:13px;font-weight:700;flex-shrink:0;
-}
-.gc-title{font-size:15px;font-weight:700;color:var(--text);}
-.gc-sub{font-size:12px;color:var(--muted);margin-top:1px;}
-.gc-steps{padding:16px 20px;}
-.gc-step{
-  display:flex;gap:12px;padding:10px 0;
-  border-bottom:1px solid var(--border);font-size:13px;
-}
-.gc-step:last-child{border-bottom:none;}
-.gc-step-num{
-  width:20px;height:20px;border-radius:50%;
-  background:var(--bg2);border:1px solid var(--border);
-  display:flex;align-items:center;justify-content:center;
-  font-size:10px;font-weight:700;color:var(--muted);
-  flex-shrink:0;margin-top:1px;
-}
-.gc-step-text{color:var(--text2);line-height:1.6;}
-.gc-step-text strong{color:var(--text);font-weight:700;}
-.gc-step-text a{color:var(--accent3);font-weight:600;text-decoration:none;}
-.gc-step-text a:hover{text-decoration:underline;}
-.gc-tip{
-  margin:12px 20px 16px;
-  background:var(--warn-l);border:1px solid rgba(107,74,0,.15);
-  border-radius:6px;padding:10px 14px;
-  font-size:12px;color:var(--warn);line-height:1.6;
-}
-
-/* ── ANIMATIONS ──────────────────────────── */
-@keyframes rotate{to{transform:rotate(360deg)}}
-@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 
-<!-- TOP NAV -->
-<nav class="topnav">
-  <div class="nav-brand">
+<nav class="nav">
+  <a class="nav-brand" href="#">
     <div class="nav-logo">S</div>
-    Sterling AI Assistant
-  </div>
-  <div class="nav-links">
-    <button class="nav-link active" onclick="showPage('setup')">Setup</button>
-    <button class="nav-link" onclick="showPage('guide')">How to get credentials</button>
-    <a href="/logout" class="nav-link" style="color:#7a1f1f;">Sign Out</a>
+    <span class="nav-name">Sterling AI</span>
+  </a>
+  <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+  <div class="nav-links" id="navMenu">
+    <button class="nav-link active" onclick="showPage('setup', this)">Setup</button>
+    <button class="nav-link" onclick="showPage('features', this)">Features</button>
+    <button class="nav-link" onclick="showPage('pricing', this)">Pricing</button>
+    <button class="nav-link" onclick="showPage('guide', this)">Guide</button>
+    <a href="/logout" class="nav-out">Sign Out</a>
   </div>
 </nav>
 
-<!-- ══════════════════════════════════════════
-     PAGE: SETUP
-══════════════════════════════════════════ -->
+<!-- SETUP PAGE -->
 <div class="page active" id="page-setup">
-
-  <!-- Hero -->
   <div class="hero">
-    <div class="hero-left" style="animation:fadeUp .7s both">
-      <div class="hero-eyebrow"><span></span> AI-Powered WhatsApp Agent</div>
-      <h1>Meet your<br/><em>Sterling AI</em><br/>Assistant</h1>
-      <p class="hero-desc">Connect your Google account and WhatsApp Business in minutes. Your intelligent agent will log expenses, send emails, and manage your calendar — all from a simple WhatsApp message.</p>
-      <div class="hero-cta">
-        <button class="btn btn-primary btn-lg" onclick="scrollToSetup()">Start Setup &rarr;</button>
-        <button class="btn btn-ghost btn-lg" onclick="showPage('guide')">View Guide</button>
-      </div>
-    </div>
-    <div class="hero-right" style="animation:fadeUp .7s .1s both">
-      <div class="mini-stats">
-        <div class="mini-stat"><div class="ms-icon">💬</div><div class="ms-val">WhatsApp</div><div class="ms-lbl">Business API</div></div>
-        <div class="mini-stat"><div class="ms-icon">🧠</div><div class="ms-val">GPT-4o</div><div class="ms-lbl">AI Engine</div></div>
-        <div class="mini-stat"><div class="ms-icon">📊</div><div class="ms-val">Sheets</div><div class="ms-lbl">Auto tracking</div></div>
-        <div class="mini-stat"><div class="ms-icon">📅</div><div class="ms-val">Calendar</div><div class="ms-lbl">Smart scheduling</div></div>
-      </div>
-      <div class="activity-title">What your agent can do</div>
-      <div class="activity-item"><div class="ai-dot green"></div><div class="ai-text">"I spent ₹500 on groceries"</div><div class="ai-time">→ logs to Sheet</div></div>
-      <div class="activity-item"><div class="ai-dot amber"></div><div class="ai-text">"Schedule meeting tomorrow 3pm"</div><div class="ai-time">→ Calendar event</div></div>
-      <div class="activity-item"><div class="ai-dot blue"></div><div class="ai-text">"Send email to john@acme.com"</div><div class="ai-time">→ Gmail sent</div></div>
-    </div>
+    <div class="hero-badge"><div class="dot"></div><span>Secure Initialization</span></div>
+    <h1>Deploy your<br/><em>Sterling AI</em><br/>Agent</h1>
+    <p>Configure your Google Workspace and WhatsApp Business API credentials to activate your luxurious, autonomous assistant.</p>
   </div>
 
-  <!-- Progress bar -->
-  <div class="progress-bar" id="setup-section">
-    <div class="progress-inner">
+  <div class="prog-container">
+    <div class="prog-inner">
       <div class="prog-step active" id="ps1" onclick="goToStep(1)">
-        <div class="prog-num" id="pn1">1</div>
-        <div class="prog-info">
-          <div class="prog-label">Connect Google</div>
-          <div class="prog-sub">Gmail · Sheets · Calendar</div>
-        </div>
+        <div class="prog-num">1</div>
+        <div class="prog-text"><span class="prog-label">Google Auth</span><span class="prog-sub">Workspace Access</span></div>
       </div>
-      <div class="prog-divider"></div>
+      <div class="prog-line"></div>
       <div class="prog-step" id="ps2" onclick="goToStep(2)">
-        <div class="prog-num" id="pn2">2</div>
-        <div class="prog-info">
-          <div class="prog-label">WhatsApp & Services</div>
-          <div class="prog-sub">Token · Phone ID · Sheet</div>
-        </div>
+        <div class="prog-num">2</div>
+        <div class="prog-text"><span class="prog-label">WhatsApp API</span><span class="prog-sub">Meta Integration</span></div>
       </div>
-      <div class="prog-divider"></div>
+      <div class="prog-line"></div>
       <div class="prog-step" id="ps3" onclick="goToStep(3)">
-        <div class="prog-num" id="pn3">3</div>
-        <div class="prog-info">
-          <div class="prog-label">Activate Agent</div>
-          <div class="prog-sub">Verify & go live</div>
-        </div>
+        <div class="prog-num">3</div>
+        <div class="prog-text"><span class="prog-label">Activation</span><span class="prog-sub">System Live</span></div>
       </div>
     </div>
   </div>
 
-  <!-- Setup panels -->
   <div class="setup-wrap">
-
-    <!-- ── PANEL 1: Google ── -->
+    
+    <!-- Step 1: Google -->
     <div class="setup-panel active" id="sp1">
       <div class="sp-header">
-        <div class="sp-step-tag">Step 01</div>
-        <h2>Connect your Google Account</h2>
-        <p>Grant Sterling AI access to your Gmail, Google Sheets and Google Calendar. This is a secure OAuth connection — we never store your password.</p>
+        <h2>Google Workspace</h2>
+        <p>Grant Sterling AI secure access to your Gmail, Calendar, and Sheets infrastructure.</p>
+      </div>
+      
+      <div class="g-card">
+        <div class="g-header">
+          <div class="g-info">
+            <div class="g-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            </div>
+            <div class="g-text">
+              <h3>Google Account Integration</h3>
+              <p>Required for email, calendar events, and finance tracking.</p>
+            </div>
+          </div>
+          <div class="g-status" id="gstatus">Pending Connection</div>
+        </div>
+        <button class="btn btn-glass" onclick="connectGoogle()">Authenticate with Google</button>
       </div>
 
-      <div class="g-connect-card">
-        <div class="gcc-header">
-          <div class="gcc-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-          </div>
-          <div>
-            <div class="gcc-title">Google Workspace</div>
-            <div class="gcc-sub">Gmail · Google Sheets · Google Calendar</div>
-          </div>
-          <div class="gcc-status" id="gstatus">
-            <div class="dot"></div>Not connected
-          </div>
-        </div>
-        <div class="gcc-perms">
-          <div class="perm-chip">✉ Send emails via Gmail</div>
-          <div class="perm-chip">📊 Read &amp; write Google Sheets</div>
-          <div class="perm-chip">📅 Create Calendar events</div>
-          <div class="perm-chip">🗂 Google Drive access</div>
-        </div>
-        <div class="gcc-actions">
-  <!-- Show when NOT connected -->
-  <div id="g-signin-btn">
-    <button class="btn btn-google" onclick="connectGoogle()">
-      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-      Sign in with Google
-    </button>
-  </div>
-
-  <!-- Show when connected -->
-  <div id="g-connected-btn" style="display:none;display:flex;align-items:center;gap:12px;flex:1;">
-    <div class="alert alert-ok" id="g-ok" style="margin:0;flex:1;display:block;">✓ Google account connected successfully</div>
-    <button class="btn btn-ghost" onclick="reconnectGoogle()" style="white-space:nowrap;font-size:12px;">
-      🔄 Reconnect
-    </button>
-  </div>
-</div>
-
-      <div class="btn-row">
-        <button class="btn btn-primary btn-lg" id="btn-next1" onclick="goToStep(2)" disabled>Continue to WhatsApp Setup &rarr;</button>
-        <span style="font-size:12px;color:var(--faint);">Need help? <a href="#" onclick="showPage('guide');return false;" style="color:var(--accent3);font-weight:600;">View the guide</a></span>
+      <div class="action-bar">
+        <div></div>
+        <button class="btn btn-gold" onclick="goToStep(2)">Proceed to Configuration &rarr;</button>
       </div>
     </div>
 
-    <!-- ── PANEL 2: WhatsApp ── -->
+    <!-- Step 2: WhatsApp & Sheets -->
     <div class="setup-panel" id="sp2">
       <div class="sp-header">
-        <div class="sp-step-tag">Step 02</div>
-        <h2>WhatsApp &amp; Service Credentials</h2>
-        <p>Enter your Meta Business API details and Google Sheet ID. Not sure where to find these? <a href="#" onclick="showPage('guide');return false;" style="color:var(--accent3);font-weight:600;">Open the step-by-step guide →</a></p>
+        <h2>System Configuration</h2>
+        <p>Provide your Meta API keys and designated Google Sheet identifier.</p>
+      </div>
+      
+      <div class="alert alert-error" id="wa-err"></div>
+      <div class="alert alert-success" id="wa-ok"></div>
+
+      <div class="form-group">
+        <div class="form-label"><span>Permanent Access Token</span><span class="form-badge">Required</span></div>
+        <input type="password" id="wa_token" class="form-input" placeholder="EAAxxxxxxxxx..."/>
+        <div class="form-hint"><i>🔑</i><span>Generated via Meta Business Settings (whatsapp_business_messaging).</span></div>
       </div>
 
-      <div class="alert alert-err" id="wa-err"></div>
-      <div class="alert alert-ok"  id="wa-ok"></div>
-
-      <div class="section-group">
-        <div class="sg-title">WhatsApp Business API</div>
-
-        <div class="field-card">
-          <div class="fc-top">
-            <div class="fc-label">Permanent Access Token</div>
-            <div class="fc-badge required">Required</div>
-          </div>
-          <input class="fc-input" type="password" id="wa_token" placeholder="EAAxxxxxxxxxxxxxxxxxx — paste your permanent token here"/>
-          <div class="fc-divider"></div>
-          <div class="fc-guide">
-            <div class="fc-guide-icon">🔑</div>
-            <div class="fc-guide-text">
-              This token <strong>never expires</strong>. To get it: go to <a href="https://business.facebook.com/settings" target="_blank">business.facebook.com/settings</a> → <strong>Users → System Users</strong> → Add a System User (role: Admin) → click <strong>"Generate New Token"</strong> → select your App → enable <strong>whatsapp_business_messaging</strong> &amp; <strong>whatsapp_business_management</strong> permissions → click Generate. Copy the token that appears. <a href="#" onclick="showPage('guide');return false;">See full guide →</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="field-card">
-          <div class="fc-top">
-            <div class="fc-label">Phone Number ID</div>
-            <div class="fc-badge required">Required</div>
-          </div>
-          <input class="fc-input" type="text" id="wa_phone_id" placeholder="e.g. 1066407156552903"/>
-          <div class="fc-divider"></div>
-          <div class="fc-guide">
-            <div class="fc-guide-icon">📱</div>
-            <div class="fc-guide-text">
-              On the same <strong>API Setup</strong> page, look for <strong>"Phone Number ID"</strong> — it's a long number directly below the access token box. This is NOT your actual phone number. <a href="#" onclick="showPage('guide');return false;">See screenshot guide →</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="field-card">
-          <div class="fc-top">
-            <div class="fc-label">Webhook Verify Token</div>
-            <div class="fc-badge">Customisable</div>
-          </div>
-          <input class="fc-input" type="text" id="wa_verify_token" value="my_verify_token" placeholder="Choose any secret passphrase"/>
-          <div class="fc-divider"></div>
-          <div class="fc-guide">
-            <div class="fc-guide-icon">🔐</div>
-            <div class="fc-guide-text">
-              This is a <strong>secret passphrase you choose</strong> — it can be anything (e.g. <em>sterling_secret_2024</em>). You will enter this same value in the Meta webhook settings when you paste your server URL. Keep it private.
-            </div>
-          </div>
-        </div>
+      <div class="form-group">
+        <div class="form-label"><span>Phone Number ID</span><span class="form-badge">Required</span></div>
+        <input type="text" id="wa_phone_id" class="form-input" placeholder="e.g. 1066407156552903"/>
       </div>
 
-      <div class="field-card">
-  <div class="fc-top">
-    <div class="fc-label">Your WhatsApp Phone Number</div>
-    <div class="fc-badge required">Required</div>
+      <div class="form-group">
+        <div class="form-label"><span>Webhook Verify Token</span><span class="form-badge" style="color:var(--text-muted);border-color:transparent;">Custom</span></div>
+        <input type="text" id="wa_verify_token" class="form-input" value="my_verify_token"/>
+      </div>
+
+      <div class="form-group">
+        <div class="form-label"><span>Your WhatsApp Number</span><span class="form-badge">Required</span></div>
+        <input type="text" id="wa_phone" class="form-input" placeholder="919876543210"/>
+        <div class="form-hint"><i>📱</i><span>Include country code without the '+' symbol.</span></div>
+      </div>
+
+      <div class="form-group" style="margin-top:40px;">
+        <div class="form-label"><span>Finance Tracking Sheet ID</span><span class="form-badge">Required</span></div>
+        <input type="text" id="sheet_id" class="form-input" placeholder="Google Sheet ID from URL"/>
+      </div>
+
+      <div class="form-group">
+        <div class="form-label"><span>System Alert Email</span><span class="form-badge">Required</span></div>
+        <input type="email" id="alert_email" class="form-input" placeholder="admin@example.com"/>
+      </div>
+
+      <button class="btn btn-outline" style="width:100%;margin-top:20px;" onclick="verifyCredentials()">Initialize Diagnostics</button>
+
+      <div class="verify-box" id="vbox">
+        <div class="v-row"><div class="v-icon loading" id="vi-wa"></div><div><div class="v-text">Meta API Handshake</div><div class="v-sub" id="vm-wa">Awaiting execution...</div></div></div>
+        <div class="v-row"><div class="v-icon loading" id="vi-sh"></div><div><div class="v-text">Sheet Permissions</div><div class="v-sub" id="vm-sh">Awaiting execution...</div></div></div>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn btn-glass" onclick="goToStep(1)">&larr; Return</button>
+        <button class="btn btn-gold" onclick="saveConfig()">Save & Deploy Agent &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Success -->
+    <div class="setup-panel" id="sp3" style="text-align:center;">
+      <div style="width:80px;height:80px;background:var(--success-bg);border:2px solid #4caf50;color:#4caf50;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 30px;">✓</div>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:40px;color:var(--gold);margin-bottom:20px;">Agent Operational</h2>
+      <p style="color:var(--text-muted);line-height:1.8;margin-bottom:40px;">Sterling AI is now monitoring your WhatsApp endpoint. Systems are fully integrated.</p>
+      <button class="btn btn-gold" onclick="window.location.href='/auth/status'">View Dashboard Telemetry</button>
+    </div>
+
   </div>
-  <input class="fc-input" type="text" id="wa_phone" placeholder="e.g. 919876543210 (with country code, no +)"/>
-  <div class="fc-divider"></div>
-  <div class="fc-guide">
-    <div class="fc-guide-icon">📱</div>
-    <div class="fc-guide-text">
-      Enter your WhatsApp number with country code but <strong>without the + sign</strong>. 
-      Example: India number +91 98765 43210 → enter <strong>919876543210</strong>
+</div>
+
+<!-- FEATURES PAGE -->
+<div class="page" id="page-features">
+  <div class="hero" style="margin-bottom:40px;">
+    <h1>Arsenal of <em>Capabilities</em></h1>
+    <p>Discover the 12 premium autonomous functions powering your Sterling AI assistant.</p>
+  </div>
+  
+  <div class="features-grid">
+    <div class="feature-card"><div class="fc-content"><div class="fc-icon">✉️</div><h3 class="fc-title">Gmail Autopilot</h3><p class="fc-desc">Draft, read, and dispatch emails intelligently without ever leaving the chat interface.</p></div></div>
+    <div class="feature-card"><div class="fc-content"><div class="fc-icon">📊</div><h3 class="fc-title">Smart Sheets</h3><p class="fc-desc">Log expenses and auto-calculate balances in your secure Google Sheets ledger instantly.</p></div></div>
+    <div class="feature-card"><div class="fc-content"><div class="fc-icon">📅</div><h3 class="fc-title">Calendar Sync</h3><p class="fc-desc">Schedule, update, or cancel meetings. The AI manages your timeline autonomously.</p></div></div>
+    <div class="feature-card"><div class="fc-content"><div class="fc-icon">💬</div><h3 class="fc-title">WhatsApp Native</h3><p class="fc-desc">Zero app installation required. Interact with natural language through WhatsApp.</p></div></div>
+    <div class="feature-card"><div class="fc-content"><div class="fc-icon">🔍</div><h3 class="fc-title">Real-time Search</h3><p class="fc-desc">Bypass LLM cutoff dates. Agent scours the live web to fetch current data and news.</p></div></div>
+    <div class="feature-card"><div class="fc-content"><div class="fc-icon">🔥</div><h3 class="fc-title">Fireflies Sync</h3><p class="fc-desc">Automatically ingest and process meeting transcripts generated by Fireflies.ai.</p></div></div>
+    <div class="feature-card"><div class="fc-content"><div class="fc-icon">🎙️</div><h3 class="fc-title">Voice Transcription</h3><p class="fc-desc">Send voice notes instead of typing. Advanced audio models transcribe and act on intent.</p></div></div>
+    <div class="feature-card"><div class="fc-content"><div class="fc-icon">🧠</div><h3 class="fc-title">Persistent Memory</h3><p class="fc-desc">Agent remembers past context, preferences, and details across conversational sessions.</p></div></div>
+    <div class="feature-card"><div class="fc-content"><div class="fc-icon">🔐</div><h3 class="fc-title">OTP Security</h3><p class="fc-desc">Bank-grade mobile verification ensures your agent only responds to authorized numbers.</p></div></div>
+    <div class="feature-card"><div class="fc-content"><div class="fc-icon">📈</div><h3 class="fc-title">Data Analysis</h3><p class="fc-desc">Ask queries about your sheet data. "How much did I spend on food this month?"</p></div></div>
+    <div class="feature-card"><div class="fc-content"><div class="fc-icon">⚡</div><h3 class="fc-title">Custom Workflows</h3><p class="fc-desc">Chain tools together. E.g., Search the web for a topic and email the summary to a client.</p></div></div>
+    <div class="feature-card"><div class="fc-content"><div class="fc-icon">🤖</div><h3 class="fc-title">Auto-Replies</h3><p class="fc-desc">Configurable logic to handle incoming queries when you are unavailable.</p></div></div>
+  </div>
+</div>
+
+<!-- PRICING PAGE -->
+<div class="page" id="page-pricing">
+  <div class="hero" style="margin-bottom:40px;">
+    <h1>Exclusive <em>Tiers</em></h1>
+    <p>Select the subscription that matches your operational requirements.</p>
+  </div>
+
+  <div class="pricing-container">
+    <div class="tier-card">
+      <h3 class="tier-name">Free</h3>
+      <div class="tier-price">₹0<span>/mo</span></div>
+      <p class="tier-desc">Basic conversational capabilities to test the AI.</p>
+      <ul class="tier-features">
+        <li><i>✓</i> 50 messages per month</li>
+        <li><i>✓</i> Text processing only</li>
+        <li><i>✓</i> Standard response time</li>
+      </ul>
+      <button class="btn btn-glass" style="width:100%">Current Plan</button>
+    </div>
+
+    <div class="tier-card">
+      <h3 class="tier-name">Pro</h3>
+      <div class="tier-price">₹999<span>/mo</span></div>
+      <p class="tier-desc">Unlock core Google Workspace integrations.</p>
+      <ul class="tier-features">
+        <li><i>✓</i> 1,000 messages per month</li>
+        <li><i>✓</i> Gmail, Sheets, Calendar</li>
+        <li><i>✓</i> Web Search access</li>
+        <li><i>✓</i> Voice note transcription</li>
+      </ul>
+      <button class="btn btn-outline" style="width:100%">Upgrade to Pro</button>
+    </div>
+
+    <div class="tier-card featured">
+      <div class="tier-badge">Most Popular</div>
+      <h3 class="tier-name">Premium</h3>
+      <div class="tier-price">₹2,499<span>/mo</span></div>
+      <p class="tier-desc">Advanced memory and meeting intelligence.</p>
+      <ul class="tier-features">
+        <li><i>✓</i> Unlimited messaging</li>
+        <li><i>✓</i> Fireflies.ai integration</li>
+        <li><i>✓</i> Persistent Long-term Memory</li>
+        <li><i>✓</i> Priority processing speed</li>
+        <li><i>✓</i> Multi-tool chained workflows</li>
+      </ul>
+      <button class="btn btn-gold" style="width:100%">Upgrade to Premium</button>
+    </div>
+
+    <div class="tier-card vip">
+      <h3 class="tier-name" style="color:var(--gold);">VIP Enterprise</h3>
+      <div class="tier-price" style="color:#fff;">Custom</div>
+      <p class="tier-desc">Bespoke integrations built exclusively for your business.</p>
+      <ul class="tier-features">
+        <li><i>✓</i> Custom internal API hooks</li>
+        <li><i>✓</i> Dedicated server instance</li>
+        <li><i>✓</i> White-labeled WhatsApp bot</li>
+        <li><i>✓</i> 24/7 dedicated support</li>
+      </ul>
+      <button class="btn btn-glass" style="width:100%; border-color:var(--gold); color:var(--gold);" onclick="alert('Contacting admin via WhatsApp/Email...')">Contact Admin</button>
     </div>
   </div>
 </div>
 
-      <div class="section-group">
-        <div class="sg-title">Google Services</div>
-
-        <div class="field-card">
-          <div class="fc-top">
-            <div class="fc-label">Google Sheet ID</div>
-            <div class="fc-badge required">Required</div>
-          </div>
-          <input class="fc-input" type="text" id="sheet_id" placeholder="Paste the ID from your Google Sheet URL"/>
-          <div class="fc-divider"></div>
-          <div class="fc-guide">
-            <div class="fc-guide-icon">🔗</div>
-            <div class="fc-guide-text">
-              Open your Google Sheet → look at the URL in the browser: <br/>
-              <strong>docs.google.com/spreadsheets/d/<span style="background:#fdf6e3;padding:1px 4px;border-radius:3px;color:var(--warn);">THIS-IS-YOUR-SHEET-ID</span>/edit</strong><br/>
-              Copy the highlighted part and paste it here. Make sure the sheet has columns: <strong>credit/debit · purpose · amount · balance</strong>
-            </div>
-          </div>
-        </div>
-
-        <div class="field-card">
-          <div class="fc-top">
-            <div class="fc-label">Low Balance Alert Email</div>
-            <div class="fc-badge required">Required</div>
-          </div>
-          <input class="fc-input" type="email" id="alert_email" placeholder="email@example.com"/>
-          <div class="fc-divider"></div>
-          <div class="fc-guide">
-            <div class="fc-guide-icon">🔔</div>
-            <div class="fc-guide-text">
-              When the tracked balance drops to <strong>₹5,000 or below</strong>, Sterling AI will automatically send a warning email to this address. Use your own email or your client's email. Make sure to spell it correctly.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Verify button -->
-      <button class="btn btn-verify" id="btn-verify" onclick="verifyCredentials()">
-        <div class="spin spin-dark" id="vspin"></div>
-        <span id="vtxt">✓ &nbsp;Verify All Credentials</span>
-      </button>
-
-      <!-- Verify results -->
-      <div class="verify-box" id="vbox">
-        <div class="vb-header">
-          <span>Verification Results</span>
-          <span id="vbox-summary" style="font-size:12px;"></span>
-        </div>
-        <div class="vb-row" id="vr-wa">
-          <div class="vb-icon loading" id="vi-wa">⏳</div>
-          <div><div class="vb-name">WhatsApp API</div><div class="vb-msg" id="vm-wa">Checking…</div></div>
-        </div>
-        <div class="vb-row" id="vr-sh">
-          <div class="vb-icon loading" id="vi-sh">⏳</div>
-          <div><div class="vb-name">Google Sheets</div><div class="vb-msg" id="vm-sh">Checking…</div></div>
-        </div>
-        <div class="vb-row" id="vr-em">
-          <div class="vb-icon loading" id="vi-em">⏳</div>
-          <div><div class="vb-name">Alert Email</div><div class="vb-msg" id="vm-em">Checking…</div></div>
-        </div>
-      </div>
-
-      <div class="btn-row">
-        <button class="btn btn-ghost" onclick="goToStep(1)">&larr; Back</button>
-        <button class="btn btn-primary btn-lg" id="btn-save" onclick="saveConfig()" disabled>
-          <div class="spin" id="sspin"></div>
-          <span id="stxt">Save &amp; Activate Agent &rarr;</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- ── PANEL 3: Success ── -->
-    <div class="setup-panel" id="sp3">
-      <div class="success-page">
-        <div class="success-seal">✓</div>
-        <h2>Sterling AI is live!</h2>
-        <p class="sub">All services are connected and verified. Your WhatsApp agent is ready to receive messages and take action on your behalf.</p>
-        <div class="services-row">
-          <div class="svc-badge"><div class="svc-dot"></div>Gmail</div>
-          <div class="svc-badge"><div class="svc-dot"></div>Google Sheets</div>
-          <div class="svc-badge"><div class="svc-dot"></div>Google Calendar</div>
-          <div class="svc-badge"><div class="svc-dot"></div>WhatsApp API</div>
-        </div>
-        <div class="try-card">
-          <div class="tc-title">Try these messages on WhatsApp</div>
-          <div class="tc-msg">
-            "I spent ₹500 on groceries. My balance is 10000."<br/>
-            "Send email to john@example.com subject: Hello"<br/>
-            "Schedule team standup tomorrow at 10am"<br/>
-            "What's my current balance?"
-          </div>
-        </div>
-        <button class="btn btn-primary btn-lg" onclick="window.location.href='/auth/status'">Check Live Status</button>
-      </div>
-    </div>
-
-  </div><!-- /setup-wrap -->
-</div><!-- /page-setup -->
-
-
-<!-- ══════════════════════════════════════════
-     PAGE: GUIDE
-══════════════════════════════════════════ -->
+<!-- GUIDE PAGE -->
 <div class="page" id="page-guide">
-  <div class="guide-page">
-
-    <div class="guide-hero">
-      <h2>How to get your credentials</h2>
-      <p>Follow these step-by-step guides to collect every piece of information needed to activate Sterling AI Assistant. Each section covers one credential with exact navigation instructions.</p>
-    </div>
-
-    <div class="guide-grid">
-
-      <!-- WhatsApp Permanent Access Token -->
-      <div class="guide-card">
-        <div class="gc-header">
-          <div class="gc-num">1</div>
-          <div>
-            <div class="gc-title">Permanent Access Token</div>
-            <div class="gc-sub">Via Meta Business Suite — never expires</div>
-          </div>
-        </div>
-        <div class="gc-steps">
-          <div class="gc-step"><div class="gc-step-num">1</div><div class="gc-step-text">Go to <a href="https://business.facebook.com/settings" target="_blank">business.facebook.com/settings</a> and log in</div></div>
-          <div class="gc-step"><div class="gc-step-num">2</div><div class="gc-step-text">In the left menu go to <strong>Users → System Users</strong> → click <strong>"Add"</strong> → give it a name (e.g. <em>Sterling Bot</em>) and set role to <strong>Admin</strong></div></div>
-          <div class="gc-step"><div class="gc-step-num">3</div><div class="gc-step-text">Click <strong>"Generate New Token"</strong> → select your WhatsApp App from the dropdown</div></div>
-          <div class="gc-step"><div class="gc-step-num">4</div><div class="gc-step-text">Enable these two permissions: <strong>whatsapp_business_messaging</strong> and <strong>whatsapp_business_management</strong></div></div>
-          <div class="gc-step"><div class="gc-step-num">5</div><div class="gc-step-text">Set <strong>Token Expiration</strong> to <strong>"Never"</strong> → click <strong>Generate Token</strong></div></div>
-          <div class="gc-step"><div class="gc-step-num">6</div><div class="gc-step-text"><strong>Copy the token immediately</strong> — it starts with <strong>EAA…</strong> and is shown only once. Paste it into the Access Token field in Setup Step 2.</div></div>
-        </div>
-        <div class="gc-tip">✅ This permanent token never expires, so your agent will keep working without any manual refresh. Make sure the System User has access to your WhatsApp Business Account assets.</div>
-      </div>
-
-      <!-- Phone Number ID -->
-      <div class="guide-card">
-        <div class="gc-header">
-          <div class="gc-num">2</div>
-          <div>
-            <div class="gc-title">Phone Number ID</div>
-            <div class="gc-sub">From Meta Developer Console</div>
-          </div>
-        </div>
-        <div class="gc-steps">
-          <div class="gc-step"><div class="gc-step-num">1</div><div class="gc-step-text">On the same <strong>API Setup</strong> page (WhatsApp → API Setup)</div></div>
-          <div class="gc-step"><div class="gc-step-num">2</div><div class="gc-step-text">Under <strong>"Send and receive messages"</strong>, find the <strong>From</strong> dropdown with your phone number</div></div>
-          <div class="gc-step"><div class="gc-step-num">3</div><div class="gc-step-text">Below the dropdown you will see <strong>Phone Number ID: 106640715…</strong> — click the copy icon next to it</div></div>
-          <div class="gc-step"><div class="gc-step-num">4</div><div class="gc-step-text">This is a <strong>numeric ID</strong> — it is NOT your actual phone number (e.g. +91 89219 25327)</div></div>
-        </div>
-        <div class="gc-tip">💡 The Phone Number ID and Access Token are always on the same page. Bookmark it for easy access when tokens expire.</div>
-      </div>
-
-      <!-- Google Sheet ID -->
-      <div class="guide-card">
-        <div class="gc-header">
-          <div class="gc-num">3</div>
-          <div>
-            <div class="gc-title">Google Sheet ID</div>
-            <div class="gc-sub">From Google Sheets URL</div>
-          </div>
-        </div>
-        <div class="gc-steps">
-          <div class="gc-step"><div class="gc-step-num">1</div><div class="gc-step-text">Open <a href="https://sheets.google.com" target="_blank">Google Sheets</a> and open the expense tracker spreadsheet</div></div>
-          <div class="gc-step"><div class="gc-step-num">2</div><div class="gc-step-text">Look at the browser URL bar — it will look like: <strong>docs.google.com/spreadsheets/d/ABC123.../edit</strong></div></div>
-          <div class="gc-step"><div class="gc-step-num">3</div><div class="gc-step-text">Copy the part between <strong>/d/</strong> and <strong>/edit</strong> — that is your Sheet ID</div></div>
-          <div class="gc-step"><div class="gc-step-num">4</div><div class="gc-step-text">Make sure Row 1 has these headers: <strong>credit / debit · purpose · amount · balance</strong></div></div>
-          <div class="gc-step"><div class="gc-step-num">5</div><div class="gc-step-text">The Sheet must be owned by or shared with the Google account you connected in Step 1</div></div>
-        </div>
-      </div>
-
-      <!-- Webhook Setup -->
-      <div class="guide-card">
-        <div class="gc-header">
-          <div class="gc-num">4</div>
-          <div>
-            <div class="gc-title">Configure Meta Webhook</div>
-            <div class="gc-sub">After setup is complete</div>
-          </div>
-        </div>
-        <div class="gc-steps">
-          <div class="gc-step"><div class="gc-step-num">1</div><div class="gc-step-text">In Meta Console → <strong>WhatsApp → Configuration</strong></div></div>
-          <div class="gc-step"><div class="gc-step-num">2</div><div class="gc-step-text">Under <strong>Webhook</strong>, click <strong>Edit</strong></div></div>
-          <div class="gc-step"><div class="gc-step-num">3</div><div class="gc-step-text">Set <strong>Callback URL</strong> to: <strong>https://sterling-ai-agent.onrender.com/webhook/whatsapp</strong></div></div>
-          <div class="gc-step"><div class="gc-step-num">4</div><div class="gc-step-text">Set <strong>Verify Token</strong> to the same passphrase you entered in Setup Step 2</div></div>
-          <div class="gc-step"><div class="gc-step-num">5</div><div class="gc-step-text">Click <strong>Verify and Save</strong> → then subscribe to the <strong>messages</strong> field</div></div>
-        </div>
-        <div class="gc-tip">💡 The app is hosted on Render, so this is your permanent live webhook URL. It will not change.</div>
-      </div>
-
-    </div><!-- /guide-grid -->
-
-    <div style="text-align:center;margin-top:36px;">
-      <button class="btn btn-primary btn-lg" onclick="showPage('setup');scrollToSetup()">Go to Setup &rarr;</button>
-    </div>
-
+  <div class="hero" style="margin-bottom:20px;">
+    <h1>Implementation <em>Guide</em></h1>
   </div>
-</div><!-- /page-guide -->
+  <div class="guide-content">
+    <h2>1. Meta Business Setup</h2>
+    <ol>
+      <li>Go to <strong>business.facebook.com/settings</strong>.</li>
+      <li>Under Users, select <strong>System Users</strong> and create one.</li>
+      <li>Generate a token checking <strong>whatsapp_business_messaging</strong>.</li>
+    </ol>
+    <h2>2. Google Sheets Structure</h2>
+    <p>Ensure your tracking sheet has columns for: Date, Credit/Debit, Purpose, Amount, Balance.</p>
+    <h2>3. Webhook Linking</h2>
+    <p>In Meta API settings, set callback URL to your Render domain + <code>/webhook/whatsapp</code>.</p>
+  </div>
+</div>
 
 <script>
-let googleOk = false;
-let verifyPassed = false;
-
-/* ── Page navigation ── */
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
-  const map={setup:0,guide:1};
-  document.querySelectorAll('.nav-link')[map[id]]?.classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
+function toggleMenu() {
+  document.getElementById('navMenu').classList.toggle('show');
 }
 
-function scrollToSetup(){
-  showPage('setup');
-  setTimeout(()=>document.getElementById('setup-section').scrollIntoView({behavior:'smooth'}),100);
+function showPage(pageId, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+  
+  document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else document.querySelector(`[onclick="showPage('${pageId}', this)"]`).classList.add('active');
+  
+  window.scrollTo({top:0, behavior:'smooth'});
+  document.getElementById('navMenu').classList.remove('show');
 }
 
-/* ── Steps ── */
-function goToStep(n){
-  if(n===2&&!googleOk)return;
-  [1,2,3].forEach(i=>{
-    const ps=document.getElementById('ps'+i);
-    const pn=document.getElementById('pn'+i);
-    const sp=document.getElementById('sp'+i);
-    ps.classList.remove('active','done');
-    sp.classList.remove('active');
-    if(i<n){ps.classList.add('done');pn.textContent='✓';}
-    else if(i===n){ps.classList.add('active');pn.textContent=i;sp.classList.add('active');}
-    else{pn.textContent=i;}
+function goToStep(step) {
+  document.querySelectorAll('.setup-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('sp' + step).classList.add('active');
+  
+  document.querySelectorAll('.prog-step').forEach((p, idx) => {
+    p.classList.remove('active', 'done');
+    if (idx + 1 < step) p.classList.add('done');
+    else if (idx + 1 === step) p.classList.add('active');
   });
-  document.getElementById('setup-section').scrollIntoView({behavior:'smooth'});
 }
 
-/* ── Google auth ── */
-// ── Google auth ──
-async function checkGoogle(){
-  try{
-    const r=await fetch('/auth/status');
-    const d=await r.json();
-    if(d.status==='connected') markGoogleDone();
-  }catch(_){}
+function connectGoogle() {
+  window.location.href = "/auth/google";
 }
 
-function markGoogleDone(){
-  googleOk=true;
-  const st=document.getElementById('gstatus');
-  st.classList.add('ok');
-  st.innerHTML='<div class="dot"></div>Connected';
-  // Show connected state with reconnect button
-  document.getElementById('g-signin-btn').style.display='none';
-  document.getElementById('g-connected-btn').style.display='flex';
-  document.getElementById('btn-next1').disabled=false;
+function showMsg(type, msg) {
+  const errBox = document.getElementById('wa-err');
+  const okBox = document.getElementById('wa-ok');
+  errBox.classList.remove('active');
+  okBox.classList.remove('active');
+  
+  if (type === 'err') {
+    errBox.textContent = msg;
+    errBox.classList.add('active');
+  } else if (type === 'ok') {
+    okBox.textContent = msg;
+    okBox.classList.add('active');
+  }
 }
 
-function markGoogleDisconnected(){
-  googleOk=false;
-  const st=document.getElementById('gstatus');
-  st.classList.remove('ok');
-  st.innerHTML='<div class="dot"></div>Not connected';
-  // Show sign in button
-  document.getElementById('g-signin-btn').style.display='block';
-  document.getElementById('g-connected-btn').style.display='none';
-  document.getElementById('btn-next1').disabled=true;
-}
-
-// First time sign in
-function connectGoogle(){
-  const w=window.open('/auth/google','ga','width=520,height=620,scrollbars=yes');
-  const t=setInterval(async()=>{
-    try{
-      const r=await fetch('/auth/status');
-      const d=await r.json();
-      if(d.status==='connected'){
-        clearInterval(t);
-        if(w&&!w.closed)w.close();
-        markGoogleDone();
-      }
-    }catch(_){}
-  },2000);
-}
-
-// Reconnect — clears old token first
-async function reconnectGoogle(){
-  markGoogleDisconnected();
-  await fetch('/auth/disconnect');
-  const w=window.open('/auth/google','ga','width=520,height=620,scrollbars=yes');
-  const t=setInterval(async()=>{
-    try{
-      const r=await fetch('/auth/status');
-      const d=await r.json();
-      if(d.status==='connected'){
-        clearInterval(t);
-        if(w&&!w.closed)w.close();
-        markGoogleDone();
-      }
-    }catch(_){}
-  },2000);
-}
-
-/* ── Verify ── */
-function getFields(){
-  return{
-    wa_token:        document.getElementById('wa_token').value.trim(),
-    wa_phone_id:     document.getElementById('wa_phone_id').value.trim(),
-    wa_verify_token: document.getElementById('wa_verify_token').value.trim(),
-    sheet_id:        document.getElementById('sheet_id').value.trim(),
-    alert_email:     document.getElementById('alert_email').value.trim(),
-     wa_phone:        document.getElementById('wa_phone').value.trim(),
+async function verifyCredentials() {
+  const data = {
+    wa_token: document.getElementById('wa_token').value,
+    wa_phone_id: document.getElementById('wa_phone_id').value,
+    wa_verify_token: document.getElementById('wa_verify_token').value,
+    wa_phone: document.getElementById('wa_phone').value,
+    sheet_id: document.getElementById('sheet_id').value,
+    alert_email: document.getElementById('alert_email').value
   };
-}
 
-function setVRow(id,status,msg){
-  const icon={ok:'✓',err:'✗',loading:'⏳'};
-  const vi=document.getElementById('vi-'+id);
-  const vm=document.getElementById('vm-'+id);
-  vi.className='vb-icon '+status;
-  vi.textContent=icon[status]||'⏳';
-  vm.className='vb-msg '+(status==='ok'?'ok':status==='err'?'err':'');
-  vm.textContent=msg;
-}
-
-async function verifyCredentials(){
-  const f=getFields();
-  const errEl=document.getElementById('wa-err');
-  const okEl=document.getElementById('wa-ok');
-  errEl.classList.remove('show');okEl.classList.remove('show');
-
-  if(!f.wa_token||!f.wa_phone_id||!f.sheet_id||!f.alert_email){
-    errEl.textContent='Please fill in all required fields before verifying.';
-    errEl.classList.add('show');return;
+  if(!data.wa_token || !data.wa_phone_id || !data.sheet_id) {
+    showMsg('err', 'Please fill all required fields before verifying.');
+    return;
   }
 
-  document.getElementById('vspin').style.display='block';
-  document.getElementById('vtxt').textContent='Verifying…';
-  document.getElementById('btn-verify').disabled=true;
-  document.getElementById('vbox').classList.add('show');
-  ['wa','sh','em'].forEach(k=>setVRow(k,'loading','Checking…'));
+  const vbox = document.getElementById('vbox');
+  vbox.classList.add('active');
+  
+  document.getElementById('vi-wa').className = 'v-icon loading';
+  document.getElementById('vm-wa').textContent = 'Authenticating...';
+  document.getElementById('vi-sh').className = 'v-icon loading';
+  document.getElementById('vm-sh').textContent = 'Checking access...';
 
-  try{
-    const res=await fetch('/setup/verify',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(f),
+  try {
+    const res = await fetch('/setup/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
     });
-    const data=await res.json();
-    const r=data.results;
+    const result = await res.json();
 
-    setVRow('wa',r.whatsapp.ok?'ok':'err',r.whatsapp.msg);
-    setVRow('sh',r.sheets.ok?'ok':'err',r.sheets.msg);
-    setVRow('em',r.email.ok?'ok':'err',r.email.msg);
-
-    verifyPassed=r.whatsapp.ok&&r.sheets.ok&&r.email.ok;
-    const allOk=verifyPassed;
-    document.getElementById('vbox-summary').textContent=allOk?'All checks passed ✓':'Some checks failed';
-    document.getElementById('vbox-summary').style.color=allOk?'var(--ok)':'var(--err)';
-
-    if(allOk){
-      okEl.textContent='All credentials verified — you can now save and activate your agent.';
-      okEl.classList.add('show');
-      document.getElementById('btn-save').disabled=false;
-    }else{
-      errEl.textContent='Fix the failed checks above, then verify again.';
-      errEl.classList.add('show');
-      document.getElementById('btn-save').disabled=true;
+    if(result.results?.whatsapp?.ok) {
+      document.getElementById('vi-wa').className = 'v-icon ok';
+      document.getElementById('vi-wa').textContent = '✓';
+      document.getElementById('vm-wa').textContent = 'Connected successfully.';
+    } else {
+      document.getElementById('vi-wa').className = 'v-icon err';
+      document.getElementById('vi-wa').textContent = '!';
+      document.getElementById('vm-wa').textContent = result.results?.whatsapp?.msg || 'Failed';
     }
-  }catch(_){
-    errEl.textContent='Network error — make sure the server is running.';
-    errEl.classList.add('show');
-  }
 
-  document.getElementById('vspin').style.display='none';
-  document.getElementById('vtxt').textContent='✓  Verify All Credentials';
-  document.getElementById('btn-verify').disabled=false;
+    if(result.results?.sheets?.ok) {
+      document.getElementById('vi-sh').className = 'v-icon ok';
+      document.getElementById('vi-sh').textContent = '✓';
+      document.getElementById('vm-sh').textContent = 'Accessible.';
+    } else {
+      document.getElementById('vi-sh').className = 'v-icon err';
+      document.getElementById('vi-sh').textContent = '!';
+      document.getElementById('vm-sh').textContent = result.results?.sheets?.msg || 'Failed';
+    }
+  } catch (err) {
+    showMsg('err', 'Network error during verification.');
+  }
 }
 
-/* ── Save ── */
-async function saveConfig(){
-  if(!verifyPassed)return;
-  const f=getFields();
-  document.getElementById('sspin').style.display='block';
-  document.getElementById('stxt').textContent='Saving…';
-  document.getElementById('btn-save').disabled=true;
+async function saveConfig() {
+  const data = {
+    wa_token: document.getElementById('wa_token').value,
+    wa_phone_id: document.getElementById('wa_phone_id').value,
+    wa_verify_token: document.getElementById('wa_verify_token').value,
+    wa_phone: document.getElementById('wa_phone').value,
+    sheet_id: document.getElementById('sheet_id').value,
+    alert_email: document.getElementById('alert_email').value
+  };
 
-  try{
-    const res=await fetch('/setup/whatsapp',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(f),
+  try {
+    const res = await fetch('/setup/whatsapp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
     });
-    const data=await res.json();
-    if(res.ok&&data.status==='ok'){goToStep(3);}
-    else{
-      const e=document.getElementById('wa-err');
-      e.textContent=data.detail||'Save failed. Try again.';
-      e.classList.add('show');
-      document.getElementById('btn-save').disabled=false;
+    if(res.ok) {
+      goToStep(3);
+    } else {
+      const err = await res.json();
+      showMsg('err', err.detail || 'Failed to save configuration.');
     }
-  }catch(_){
-    document.getElementById('wa-err').textContent='Network error.';
-    document.getElementById('wa-err').classList.add('show');
-    document.getElementById('btn-save').disabled=false;
+  } catch (err) {
+    showMsg('err', 'Network error while saving.');
   }
-
-  document.getElementById('sspin').style.display='none';
-  document.getElementById('stxt').textContent='Save & Activate Agent →';
 }
 
-checkGoogle();
+// Check URL params for google auth status
+window.onload = function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('google') === 'ok') {
+    document.getElementById('gstatus').textContent = 'Connected';
+    document.getElementById('gstatus').className = 'g-status connected';
+  }
+}
 </script>
 </body>
 </html>

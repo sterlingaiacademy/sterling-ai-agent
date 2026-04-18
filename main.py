@@ -1,4 +1,7 @@
 # main.py
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from agent.brain import run_agent
@@ -7,11 +10,8 @@ from agent.setup_routes import router as setup_router
 from agent.auth_middleware import router as login_router, is_authenticated
 from agent.database import get_client_by_phone
 from starlette.middleware.sessions import SessionMiddleware
-from dotenv import load_dotenv
 import traceback, os, uuid
 import requests as req
-
-load_dotenv()
 
 app = FastAPI(title="Sterling AI Assistant")
 

@@ -18,90 +18,421 @@ async def login_page():
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Sterling AI · Login</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<title>Sterling AI · The Ultimate AI Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#f4f1ec;--card:#ffffff;--border:#d4cec4;--text:#1a1714;
-  --muted:#6b6358;--accent:#1a3a2a;--accent3:#2d5a3d;--accent-l:#e8f0eb;
-  --err:#7a1f1f;--err-l:#fdf0f0;
+  --bg:#0a0a0a;
+  --surface:rgba(20,20,20,0.7);
+  --border:rgba(212,175,55,0.2);
+  --border-glow:rgba(212,175,55,0.5);
+  --text:#ffffff;
+  --text-muted:#a0a0a0;
+  --gold:#d4af37;
+  --gold-light:#f3e5ab;
+  --gold-dark:#aa8c2c;
+  --err:#ff4d4d;
+  --err-bg:rgba(255,77,77,0.1);
 }
-body{background:var(--bg);font-family:'Plus Jakarta Sans',sans-serif;
-  min-height:100vh;display:flex;align-items:center;justify-content:center;}
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;
-  padding:48px 40px;width:100%;max-width:420px;
-  box-shadow:0 2px 8px rgba(26,23,20,.06),0 12px 40px rgba(26,23,20,.08);}
-.logo{width:44px;height:44px;background:var(--accent);border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  color:white;font-size:18px;font-weight:700;margin:0 auto 20px;}
-h1{font-family:'Playfair Display',serif;font-size:28px;text-align:center;
-  color:var(--text);margin-bottom:6px;}
-.sub{text-align:center;color:var(--muted);font-size:13.5px;margin-bottom:32px;}
-.tabs{display:flex;background:#f4f1ec;border-radius:8px;padding:4px;margin-bottom:28px;}
-.tab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:600;
-  border-radius:6px;cursor:pointer;color:var(--muted);border:none;background:none;transition:all .2s;}
-.tab.active{background:var(--card);color:var(--accent);
-  box-shadow:0 1px 4px rgba(26,23,20,.1);}
-.form-group{margin-bottom:16px;}
-label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;
-  letter-spacing:1px;color:var(--accent);margin-bottom:6px;}
-input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;
-  font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--text);
-  background:var(--bg);outline:none;transition:border-color .2s;}
-input:focus{border-color:var(--accent);background:white;}
-.btn{width:100%;padding:13px;background:var(--accent);color:white;border:none;
-  border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;transition:all .2s;}
-.btn:hover{background:#0f2a1c;}
-.error{background:var(--err-l);border:1px solid rgba(122,31,31,.2);color:var(--err);
-  padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none;}
-.panel{display:none;} .panel.active{display:block;}
+body{
+  background-color:var(--bg);
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(212,175,55,0.08), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(212,175,55,0.06), transparent 25%);
+  color:var(--text);
+  font-family:'Plus Jakarta Sans',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+.glass {
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3);
+}
+
+/* Navbar */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 5%;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+  background: rgba(10,10,10,0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  font-size: 18px;
+}
+.nav-links {
+  display: flex;
+  gap: 32px;
+}
+.nav-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+.nav-links a:hover {
+  color: var(--gold-light);
+}
+.nav-btn {
+  padding: 10px 24px;
+  border-radius: 30px;
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+.nav-btn:hover {
+  background: var(--gold);
+  color: #000;
+  box-shadow: 0 0 15px var(--border-glow);
+}
+
+/* Main Layout */
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 120px 5% 60px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Hero Section */
+.hero {
+  text-align: center;
+  margin-bottom: 80px;
+  animation: fadeIn 1s ease-out;
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 56px;
+  margin-bottom: 24px;
+  background: linear-gradient(to right, var(--gold-light), var(--gold), var(--gold-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero p {
+  font-size: 18px;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto 40px;
+  line-height: 1.6;
+}
+
+/* Split Content */
+.split {
+  display: flex;
+  gap: 60px;
+  align-items: flex-start;
+}
+@media (max-width: 900px) {
+  .split {
+    flex-direction: column;
+  }
+}
+
+/* Features Info */
+.info-section {
+  flex: 1;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  color: var(--gold);
+  margin-bottom: 32px;
+}
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+}
+.feature-card {
+  padding: 24px;
+  border-radius: 16px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(212,175,55,0.1);
+  border-color: var(--gold);
+}
+.feature-icon {
+  font-size: 24px;
+  margin-bottom: 16px;
+  color: var(--gold);
+}
+.feature-card h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+.feature-card p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Auth Panel */
+.auth-section {
+  width: 100%;
+  max-width: 440px;
+  border-radius: 24px;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto;
+}
+.auth-section::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(transparent, transparent, transparent, var(--gold));
+  animation: rotate 4s linear infinite;
+  opacity: 0.1;
+}
+.auth-content {
+  position: relative;
+  z-index: 1;
+}
+
+.tabs {
+  display: flex;
+  background: rgba(0,0,0,0.3);
+  border-radius: 12px;
+  padding: 6px;
+  margin-bottom: 32px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.tab {
+  flex: 1;
+  padding: 12px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-muted);
+  border: none;
+  background: none;
+  transition: all 0.3s;
+}
+.tab.active {
+  background: var(--surface);
+  color: var(--gold);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  border: 1px solid var(--border);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: rgba(0,0,0,0.2);
+  outline: none;
+  transition: all 0.3s;
+}
+input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(212,175,55,0.2);
+  background: rgba(0,0,0,0.4);
+}
+.btn-submit {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(212,175,55,0.3);
+}
+
+.error {
+  background: var(--err-bg);
+  border: 1px solid rgba(255,77,77,0.3);
+  color: var(--err);
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  margin-bottom: 24px;
+  display: none;
+}
+.panel { display: none; animation: fadeIn 0.4s; }
+.panel.active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes rotate { 100% { transform: rotate(360deg); } }
+
+/* Decor elements */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: -1;
+}
+.orb-1 { width: 300px; height: 300px; background: rgba(212,175,55,0.15); top: -100px; right: -100px; }
+.orb-2 { width: 400px; height: 400px; background: rgba(212,175,55,0.1); bottom: -150px; left: -100px; }
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="logo">S</div>
-  <h1>Sterling AI</h1>
-  <p class="sub">Your intelligent WhatsApp assistant</p>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
 
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('login')">Sign In</button>
-    <button class="tab" onclick="switchTab('register')">Create Account</button>
+<nav>
+  <div class="brand">
+    <div class="logo-icon">S</div>
+    Sterling AI
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+  </div>
+  <button class="nav-btn" onclick="document.getElementById('auth-card').scrollIntoView({behavior:'smooth'})">Get Started</button>
+</nav>
+
+<div class="container">
+  <div class="hero">
+    <h1>Your Ultimate Personal Assistant</h1>
+    <p>Experience the epitome of AI orchestration. Connect your WhatsApp, Gmail, Calendar, and Sheets into a single, luxurious intelligence hub.</p>
   </div>
 
-  <div id="err" class="error"></div>
+  <div class="split">
+    <div class="info-section" id="features">
+      <h2 class="section-title">A Symphony of Features</h2>
+      <div class="features-grid">
+        <div class="feature-card glass">
+          <div class="feature-icon">💬</div>
+          <h3>WhatsApp Control</h3>
+          <p>Interact entirely via WhatsApp voice or text, anytime, anywhere.</p>
+        </div>
+        <div class="feature-card glass">
+          <div class="feature-icon">📅</div>
+          <h3>Smart Calendar</h3>
+          <p>Seamlessly schedule and modify your Google Calendar events.</p>
+        </div>
+        <div class="feature-card glass">
+          <div class="feature-icon">✉️</div>
+          <h3>Email Management</h3>
+          <p>Read, summarize, and draft Gmail responses intelligently.</p>
+        </div>
+        <div class="feature-card glass">
+          <div class="feature-icon">📊</div>
+          <h3>Sheets Automation</h3>
+          <p>Log expenses, update records, and read directly from Google Sheets.</p>
+        </div>
+        <div class="feature-card glass">
+          <div class="feature-icon">🎙️</div>
+          <h3>Voice Intelligence</h3>
+          <p>Transcribe and extract insights from your voice notes with ease.</p>
+        </div>
+        <div class="feature-card glass">
+          <div class="feature-icon">🌐</div>
+          <h3>Web Search</h3>
+          <p>Access real-time information from the web instantly.</p>
+        </div>
+      </div>
+    </div>
 
-  <!-- Login -->
-  <div class="panel active" id="panel-login">
-    <form method="POST" action="/login">
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" name="email" placeholder="you@example.com" required/>
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" name="password" placeholder="••••••••" required/>
-      </div>
-      <button class="btn" type="submit">Sign In →</button>
-    </form>
-  </div>
+    <div class="auth-section glass" id="auth-card">
+      <div class="auth-content">
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('login')">Sign In</button>
+          <button class="tab" onclick="switchTab('register')">Create Account</button>
+        </div>
 
-  <!-- Register -->
-  <div class="panel" id="panel-register">
-    <form method="POST" action="/register">
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" name="email" placeholder="you@example.com" required/>
+        <div id="err" class="error"></div>
+
+        <!-- Login -->
+        <div class="panel active" id="panel-login">
+          <form method="POST" action="/login">
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" name="email" placeholder="you@example.com" required/>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" name="password" placeholder="••••••••" required/>
+            </div>
+            <button class="btn-submit" type="submit">Access Dashboard</button>
+          </form>
+        </div>
+
+        <!-- Register -->
+        <div class="panel" id="panel-register">
+          <form method="POST" action="/register">
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" name="email" placeholder="you@example.com" required/>
+            </div>
+            <div class="form-group">
+              <label>Create Password</label>
+              <input type="password" name="password" placeholder="Choose a strong password" required/>
+            </div>
+            <button class="btn-submit" type="submit">Begin Your Journey</button>
+          </form>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" name="password" placeholder="Choose a strong password" required/>
-      </div>
-      <button class="btn" type="submit">Create Account →</button>
-    </form>
+    </div>
   </div>
 </div>
+
 <script>
   function switchTab(t){
     document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
@@ -172,53 +503,98 @@ async def verify_otp_page(request: Request):
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Verify Email · Sterling AI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
     <style>
     *,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
     :root{{
-      --bg:#f4f1ec;--card:#ffffff;--border:#d4cec4;--text:#1a1714;
-      --muted:#6b6358;--accent:#1a3a2a;--err:#7a1f1f;--err-l:#fdf0f0;
+      --bg:#0a0a0a;
+      --surface:rgba(20,20,20,0.7);
+      --border:rgba(212,175,55,0.2);
+      --text:#ffffff;
+      --text-muted:#a0a0a0;
+      --gold:#d4af37;
+      --gold-dark:#aa8c2c;
+      --err:#ff4d4d;
+      --err-bg:rgba(255,77,77,0.1);
     }}
-    body{{background:var(--bg);font-family:'Plus Jakarta Sans',sans-serif;
-      min-height:100vh;display:flex;align-items:center;justify-content:center;}}
-    .card{{background:var(--card);border:1px solid var(--border);border-radius:16px;
-      padding:48px 40px;width:100%;max-width:420px;
-      box-shadow:0 2px 8px rgba(26,23,20,.06),0 12px 40px rgba(26,23,20,.08);text-align:center;}}
-    .logo{{width:44px;height:44px;background:var(--accent);border-radius:10px;
-      display:inline-flex;align-items:center;justify-content:center;
-      color:white;font-size:18px;font-weight:700;margin-bottom:20px;}}
-    h1{{font-family:'Playfair Display',serif;font-size:24px;color:var(--text);margin-bottom:8px;}}
-    p.sub{{color:var(--muted);font-size:14px;margin-bottom:24px;line-height:1.5;}}
-    strong{{color:var(--text);}}
-    .form-group{{margin-bottom:16px;text-align:left;}}
-    label{{display:block;font-size:12px;font-weight:700;text-transform:uppercase;
-      letter-spacing:1px;color:var(--accent);margin-bottom:6px;}}
-    input{{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;
-      font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;text-align:center;
-      color:var(--text);background:var(--bg);outline:none;transition:border-color .2s;letter-spacing:8px;}}
-    input:focus{{border-color:var(--accent);background:white;}}
-    .btn{{width:100%;padding:13px;background:var(--accent);color:white;border:none;
-      border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;
-      font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;transition:all .2s;}}
-    .btn:hover{{background:#0f2a1c;}}
-    .error{{background:var(--err-l);border:1px solid rgba(122,31,31,.2);color:var(--err);
-      padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none;text-align:left;}}
+    body{{
+      background-color:var(--bg);
+      background-image: radial-gradient(circle at 50% 50%, rgba(212,175,55,0.05), transparent 50%);
+      color:var(--text);
+      font-family:'Plus Jakarta Sans',sans-serif;
+      min-height:100vh;
+      display:flex;align-items:center;justify-content:center;
+    }}
+    .glass {{
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3);
+    }}
+    .card {{
+      border-radius: 24px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }}
+    .card::before {{
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: conic-gradient(transparent, transparent, transparent, var(--gold));
+      animation: rotate 4s linear infinite;
+      opacity: 0.1;
+      z-index: -1;
+    }}
+    @keyframes rotate {{ 100% {{ transform: rotate(360deg); }} }}
+    .logo-icon {{
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      border-radius: 12px;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: #000; font-size: 20px; font-weight: 700;
+      margin-bottom: 24px;
+    }}
+    h1 {{ font-family: 'Playfair Display', serif; font-size: 28px; color: var(--gold); margin-bottom: 12px; }}
+    p.sub {{ color: var(--text-muted); font-size: 14px; margin-bottom: 32px; line-height: 1.6; }}
+    strong {{ color: #fff; }}
+    .form-group {{ margin-bottom: 24px; text-align: left; }}
+    label {{ display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; }}
+    input {{
+      width: 100%; padding: 16px;
+      border: 1px solid var(--border); border-radius: 10px;
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; text-align: center;
+      color: var(--text); background: rgba(0,0,0,0.2); outline: none; transition: all 0.3s; letter-spacing: 8px;
+    }}
+    input:focus {{ border-color: var(--gold); box-shadow: 0 0 0 2px rgba(212,175,55,0.2); background: rgba(0,0,0,0.4); }}
+    .btn-submit {{
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: #000; border: none; border-radius: 10px;
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px;
+    }}
+    .btn-submit:hover {{ transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,175,55,0.3); }}
+    .error {{ background: var(--err-bg); border: 1px solid rgba(255,77,77,0.3); color: var(--err); padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 24px; display: none; text-align: left; }}
     </style>
     </head>
     <body>
-    <div class="card">
-      <div class="logo">S</div>
-      <h1>Check your email</h1>
-      <p class="sub">We sent a 6-digit code to <strong>{pending_email}</strong>.<br/>Enter it below to complete registration.</p>
-
+    <div class="card glass">
+      <div class="logo-icon">S</div>
+      <h1>Verify Email</h1>
+      <p class="sub">We sent a 6-digit code to <strong>{pending_email}</strong>.<br/>Enter it below to proceed.</p>
       <div id="err" class="error"></div>
-
       <form method="POST" action="/verify-otp">
         <div class="form-group">
           <label>Verification Code</label>
           <input type="text" name="otp" placeholder="······" maxlength="6" required autocomplete="one-time-code"/>
         </div>
-        <button class="btn" type="submit">Verify & Continue →</button>
+        <button class="btn-submit" type="submit">Verify & Continue</button>
       </form>
     </div>
     <script>
