@@ -4,11 +4,8 @@ from openai import OpenAI
 from agent.database import supabase
 import uuid
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 async def download_whatsapp_audio(media_id: str, token: str) -> bytes:
     """Download audio file from WhatsApp."""
-    # Step 1: Get media URL
     meta_response = requests.get(
         f"https://graph.facebook.com/v18.0/{media_id}",
         headers={"Authorization": f"Bearer {token}"},
@@ -18,7 +15,6 @@ async def download_whatsapp_audio(media_id: str, token: str) -> bytes:
     if not media_url:
         raise Exception("Could not get media URL from Meta")
 
-    # Step 2: Download audio bytes
     audio_response = requests.get(
         media_url,
         headers={"Authorization": f"Bearer {token}"},
@@ -31,9 +27,19 @@ async def transcribe_and_save(
     media_id: str,
     token: str,
     meeting_name: str,
-    wa_phone: str
+    wa_phone: str,
+    client_data: dict = None
 ) -> str:
     """Full pipeline: download → transcribe → summarize → save to DB."""
+
+    # ── Per-user OpenAI client ────────────────────────────────────────────────
+    openai_key = None
+    if client_data:
+        openai_key = client_data.get("openai_api_key")
+    if not openai_key:
+        openai_key = os.getenv("OPENAI_API_KEY")
+    ai_client = OpenAI(api_key=openai_key)
+    client_id = (client_data or {}).get("id")
 
     # Step 1: Download audio
     print(f"[Transcribe] Downloading audio for {meeting_name}...")
@@ -57,7 +63,7 @@ async def transcribe_and_save(
         tmp_path = tmp.name
 
     with open(tmp_path, "rb") as audio_file:
-        transcript_response = client.audio.transcriptions.create(
+        transcript_response = ai_client.audio.transcriptions.create(
             model="whisper-1",
             file=audio_file
         )
@@ -65,9 +71,13 @@ async def transcribe_and_save(
     transcript_text = transcript_response.text
     print(f"[Transcribe] Transcript: {transcript_text[:100]}...")
 
-    # Step 4: Summarize and extract action items with GPT
+    # Step 4: Estimate audio duration in minutes (rough: ~150 words/min speech)
+    word_count = len(transcript_text.split())
+    estimated_minutes = round(word_count / 150, 2)
+
+    # Step 5: Summarize and extract action items with GPT
     print(f"[Transcribe] Summarizing...")
-    summary_response = client.chat.completions.create(
+    summary_response = ai_client.chat.completions.create(
         model="gpt-4o",
         messages=[
             {
@@ -82,7 +92,22 @@ async def transcribe_and_save(
     )
     summary_text = summary_response.choices[0].message.content
 
-    # Step 5: Save everything to Supabase
+    # Step 6: Track token usage + offline meeting minutes
+    if client_id:
+        from agent.database import increment_openai_usage, add_meeting_minutes
+        try:
+            usage = summary_response.usage
+            input_t  = usage.prompt_tokens or 0
+            output_t = usage.completion_tokens or 0
+            total_t  = input_t + output_t
+            cost     = round(input_t / 1000 * 0.005 + output_t / 1000 * 0.015, 6)
+            increment_openai_usage(client_id, total_t, cost)
+        except Exception as e:
+            print(f"[Transcribe] Usage tracking error: {e}")
+
+        add_meeting_minutes(client_id, "offline", estimated_minutes, 1)
+
+    # Step 7: Save everything to Supabase
     supabase.table("meeting_transcripts").insert({
         "wa_phone": wa_phone,
         "meeting_name": meeting_name,

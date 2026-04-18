@@ -19,7 +19,9 @@ from datetime import datetime
 import pytz
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# ── GPT-4o pricing (per 1K tokens) ───────────────────────────────────────────
+GPT4O_INPUT_COST_PER_1K  = 0.005   # $0.005 per 1K input tokens
+GPT4O_OUTPUT_COST_PER_1K = 0.015   # $0.015 per 1K output tokens
 
 TOOLS = [
     {
@@ -199,7 +201,7 @@ TOOLS = [
     "type": "function",
     "function": {
         "name": "search_web",
-        "description": "Search the internet for real-time information such as current weather, news, prices, sports scores, or any factual question that requires up-to-date knowledge. Use this whenever the user asks about something that may have changed recently.",
+        "description": "Search the internet for real-time information such as current weather, news, prices, cricket/sports scores, or any factual question that requires up-to-date knowledge. Use this whenever the user asks about something that may have changed recently.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -269,8 +271,23 @@ EXPENSES
 - Debit = subtract from balance | Credit = add to balance
 - If balance drops to 5000 or below, AUTOMATICALLY send a low balance alert email
 """
+
 # Deduplication: track recently sent replies per phone to prevent duplicate messages
 _last_reply: dict = {}
+
+
+def _calculate_cost(usage) -> tuple[int, float]:
+    """Return (total_tokens, cost_usd) from an OpenAI usage object."""
+    try:
+        input_tokens  = usage.prompt_tokens or 0
+        output_tokens = usage.completion_tokens or 0
+        total_tokens  = input_tokens + output_tokens
+        cost = (input_tokens  / 1000 * GPT4O_INPUT_COST_PER_1K +
+                output_tokens / 1000 * GPT4O_OUTPUT_COST_PER_1K)
+        return total_tokens, round(cost, 6)
+    except Exception:
+        return 0, 0.0
+
 
 async def run_agent(user_message: str, phone: str, client_data: dict):
     # Get current date and time in client's timezone
@@ -278,7 +295,6 @@ async def run_agent(user_message: str, phone: str, client_data: dict):
     tz = pytz.timezone(timezone)
     now = datetime.now(tz)
     current_datetime = now.strftime("%A, %d %B %Y %I:%M %p")
-    # Example: "Monday, 14 April 2026 10:42 AM"
 
     # Inject date into system prompt
     dated_system_prompt = (
@@ -289,19 +305,31 @@ async def run_agent(user_message: str, phone: str, client_data: dict):
     )
 
     # Save user message to Supabase immediately (before AI call)
-    # so it is persisted even if something crashes later
     save_user_message(phone, user_message)
 
     # Load full conversation history from Supabase
     history = get_memory(phone)
 
+    # ── Per-user OpenAI client ────────────────────────────────────────────────
+    openai_key = client_data.get("openai_api_key") or os.getenv("OPENAI_API_KEY")
+    ai_client  = OpenAI(api_key=openai_key)
+    client_id  = client_data.get("id")
+
+    total_tokens_used = 0
+    total_cost_usd    = 0.0
+
     # First AI call
-    response = client.chat.completions.create(
+    response = ai_client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "system", "content": dated_system_prompt}] + history,
         tools=TOOLS,
         tool_choice="auto"
     )
+
+    # Track usage from first call
+    tokens, cost = _calculate_cost(response.usage)
+    total_tokens_used += tokens
+    total_cost_usd    += cost
 
     reply_message = response.choices[0].message
 
@@ -311,7 +339,7 @@ async def run_agent(user_message: str, phone: str, client_data: dict):
         for tool_call in reply_message.tool_calls:
             fn_name = tool_call.function.name
             args    = json.loads(tool_call.function.arguments)
-            result = await execute_tool(fn_name, args, client_data, phone)
+            result  = await execute_tool(fn_name, args, client_data, phone)
             tool_results.append({
                 "tool_call_id": tool_call.id,
                 "role":         "tool",
@@ -336,13 +364,24 @@ async def run_agent(user_message: str, phone: str, client_data: dict):
         history.extend(tool_results)
 
         # Second AI call with tool results
-        final_response = client.chat.completions.create(
+        final_response = ai_client.chat.completions.create(
             model="gpt-4o",
             messages=[{"role": "system", "content": dated_system_prompt}] + history,
         )
+
+        # Track usage from second call
+        tokens2, cost2 = _calculate_cost(final_response.usage)
+        total_tokens_used += tokens2
+        total_cost_usd    += cost2
+
         final_text = final_response.choices[0].message.content
     else:
         final_text = reply_message.content
+
+    # ── Persist usage stats ───────────────────────────────────────────────────
+    if client_id and total_tokens_used > 0:
+        from agent.database import increment_openai_usage
+        increment_openai_usage(client_id, total_tokens_used, total_cost_usd)
 
     # ── Deduplication guard: skip if this exact reply was just sent ──
     last = _last_reply.get(phone)
@@ -355,7 +394,6 @@ async def run_agent(user_message: str, phone: str, client_data: dict):
     await send_whatsapp_message(phone, final_text, client_data=client_data)
 
     # Save assistant reply to Supabase
-    # (user message was already saved at the start of run_agent)
     from agent.database import supabase as _supa
     try:
         _supa.table("conversations").insert({
@@ -366,7 +404,6 @@ async def run_agent(user_message: str, phone: str, client_data: dict):
         print(f"[Memory] Saved assistant reply for {phone}")
     except Exception as _me:
         print(f"[Memory] Failed to save assistant reply: {_me}")
-
 
 
 async def execute_tool(name: str, args: dict, client_data: dict, phone: str):
@@ -419,7 +456,8 @@ async def execute_tool(name: str, args: dict, client_data: dict, phone: str):
             media_id=media_id,
             token=token,
             meeting_name=meeting_name,
-            wa_phone=phone
+            wa_phone=phone,
+            client_data=client_data
         )
 
         clear_pending_audio(phone)

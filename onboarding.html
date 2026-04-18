@@ -183,6 +183,30 @@ body::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%;
   .action-bar { flex-direction: column-reverse; gap: 20px; }
   .action-bar .btn { width: 100%; }
 }
+/* USAGE DASHBOARD */
+.usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto 40px; }
+.usage-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 20px; padding: 32px; backdrop-filter: blur(10px); position: relative; overflow: hidden; }
+.usage-card::after { content: ''; position: absolute; bottom: -30px; right: -30px; width: 100px; height: 100px; background: var(--gold-glow); border-radius: 50%; pointer-events: none; }
+.uc-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px; }
+.uc-value { font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 600; color: var(--gold); line-height: 1; margin-bottom: 8px; }
+.uc-sub { font-size: 13px; color: var(--text-muted); }
+.usage-bar-wrap { margin-top: 20px; }
+.usage-bar-bg { background: rgba(255,255,255,0.06); border-radius: 20px; height: 6px; overflow: hidden; }
+.usage-bar-fill { height: 100%; border-radius: 20px; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); transition: width 1s ease; }
+.usage-section-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--gold); margin: 0 auto 24px; max-width: 1200px; }
+.usage-table { width: 100%; max-width: 1200px; margin: 0 auto 40px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.usage-table table { width: 100%; border-collapse: collapse; }
+.usage-table th { padding: 14px 24px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border); }
+.usage-table td { padding: 16px 24px; font-size: 14px; color: var(--text-main); border-bottom: 1px solid rgba(255,255,255,0.04); }
+.usage-table tr:last-child td { border: none; }
+.usage-table td.gold { color: var(--gold); font-weight: 600; }
+.ff-card { background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(0,0,0,0.4)); border: 1px solid var(--gold); border-radius: 20px; padding: 32px; max-width: 1200px; margin: 0 auto 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; }
+.ff-info h3 { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--gold); margin-bottom: 8px; }
+.ff-info p { color: var(--text-muted); font-size: 14px; }
+.ff-stat { text-align: center; }
+.ff-stat .num { font-family: 'Cormorant Garamond', serif; font-size: 36px; color: var(--gold); }
+.ff-stat .lbl { font-size: 12px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+.usd-inr { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -197,6 +221,7 @@ body::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%;
     <button class="nav-link active" onclick="showPage('setup', this)">Setup</button>
     <button class="nav-link" onclick="showPage('features', this)">Features</button>
     <button class="nav-link" onclick="showPage('pricing', this)">Pricing</button>
+    <button class="nav-link" onclick="showPage('usage', this)">Usage</button>
     <button class="nav-link" onclick="showPage('guide', this)">Guide</button>
     <a href="/logout" class="nav-out">Sign Out</a>
   </div>
@@ -302,11 +327,25 @@ body::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%;
         <input type="email" id="alert_email" class="form-input" placeholder="admin@example.com"/>
       </div>
 
+      <div class="form-group" style="margin-top:40px;">
+        <div class="form-label"><span>OpenAI API Key</span><span class="form-badge">Required</span></div>
+        <input type="password" id="openai_api_key" class="form-input" placeholder="sk-proj-..."/>
+        <div class="form-hint"><i>🤖</i><span>Your personal key from <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a>. Usage billed to your account.</span></div>
+      </div>
+
+      <div class="form-group">
+        <div class="form-label"><span>Fireflies API Key</span><span class="form-badge">Required</span></div>
+        <input type="password" id="fireflies_api_key" class="form-input" placeholder="your-fireflies-key..."/>
+        <div class="form-hint"><i>🔥</i><span>Get from <a href="https://app.fireflies.ai/account" target="_blank">app.fireflies.ai/account</a> → API section.</span></div>
+      </div>
+
       <button class="btn btn-outline" style="width:100%;margin-top:20px;" onclick="verifyCredentials()">Initialize Diagnostics</button>
 
       <div class="verify-box" id="vbox">
         <div class="v-row"><div class="v-icon loading" id="vi-wa"></div><div><div class="v-text">Meta API Handshake</div><div class="v-sub" id="vm-wa">Awaiting execution...</div></div></div>
         <div class="v-row"><div class="v-icon loading" id="vi-sh"></div><div><div class="v-text">Sheet Permissions</div><div class="v-sub" id="vm-sh">Awaiting execution...</div></div></div>
+        <div class="v-row"><div class="v-icon loading" id="vi-oai"></div><div><div class="v-text">OpenAI Key</div><div class="v-sub" id="vm-oai">Awaiting execution...</div></div></div>
+        <div class="v-row"><div class="v-icon loading" id="vi-ff"></div><div><div class="v-text">Fireflies Key</div><div class="v-sub" id="vm-ff">Awaiting execution...</div></div></div>
       </div>
 
       <div class="action-bar">
@@ -412,6 +451,69 @@ body::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%;
   </div>
 </div>
 
+<!-- USAGE PAGE -->
+<div class="page" id="page-usage">
+  <div class="hero" style="margin-bottom:40px;">
+    <h1>Your <em>Usage</em> Dashboard</h1>
+    <p>A complete view of your AI consumption, meeting minutes, and costs — updated in real time.</p>
+  </div>
+
+  <div style="max-width:1200px;margin:0 auto;padding:0 20px;">
+
+    <div class="usage-grid" id="usage-cards">
+      <div class="usage-card">
+        <div class="uc-label">OpenAI Tokens Used</div>
+        <div class="uc-value" id="u-tokens">—</div>
+        <div class="uc-sub">GPT-4o total tokens consumed</div>
+        <div class="usage-bar-wrap"><div class="usage-bar-bg"><div class="usage-bar-fill" id="u-tokens-bar" style="width:0%"></div></div></div>
+      </div>
+      <div class="usage-card">
+        <div class="uc-label">OpenAI Cost</div>
+        <div class="uc-value" id="u-cost">—</div>
+        <div class="uc-sub usd-inr" id="u-cost-inr">Calculating...</div>
+        <div class="uc-sub" style="margin-top:8px;">GPT-4o: $0.005/1K input · $0.015/1K output</div>
+      </div>
+      <div class="usage-card">
+        <div class="uc-label">Online Meeting Minutes</div>
+        <div class="uc-value" id="u-online-mins">—</div>
+        <div class="uc-sub" id="u-online-count">Live meetings via link</div>
+      </div>
+      <div class="usage-card">
+        <div class="uc-label">Offline Meeting Minutes</div>
+        <div class="uc-value" id="u-offline-mins">—</div>
+        <div class="uc-sub" id="u-offline-count">Voice note recordings</div>
+      </div>
+    </div>
+
+    <div class="usage-section-title">Fireflies.ai Account</div>
+    <div class="ff-card" id="ff-card">
+      <div class="ff-info">
+        <h3 id="ff-name">Loading...</h3>
+        <p id="ff-email">Fetching your Fireflies account details</p>
+      </div>
+      <div class="ff-stat">
+        <div class="num" id="ff-mins">—</div>
+        <div class="lbl">Minutes Consumed</div>
+      </div>
+    </div>
+
+    <div class="usage-section-title">Cost Breakdown</div>
+    <div class="usage-table">
+      <table>
+        <thead><tr><th>Service</th><th>Usage</th><th>Unit Price</th><th>Estimated Cost</th></tr></thead>
+        <tbody id="cost-table-body">
+          <tr><td colspan="4" style="text-align:center;color:var(--text-muted);">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="text-align:center;margin-top:20px;">
+      <button class="btn btn-outline" onclick="loadUsage()">↻ Refresh Usage Data</button>
+    </div>
+
+  </div>
+</div>
+
 <!-- GUIDE PAGE -->
 <div class="page" id="page-guide">
   <div class="hero" style="margin-bottom:20px;">
@@ -432,6 +534,8 @@ body::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%;
 </div>
 
 <script>
+const USD_TO_INR = 84;
+
 function toggleMenu() {
   document.getElementById('navMenu').classList.toggle('show');
 }
@@ -439,19 +543,16 @@ function toggleMenu() {
 function showPage(pageId, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + pageId).classList.add('active');
-  
   document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  else document.querySelector(`[onclick="showPage('${pageId}', this)"]`).classList.add('active');
-  
   window.scrollTo({top:0, behavior:'smooth'});
   document.getElementById('navMenu').classList.remove('show');
+  if(pageId === 'usage') loadUsage();
 }
 
 function goToStep(step) {
   document.querySelectorAll('.setup-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('sp' + step).classList.add('active');
-  
   document.querySelectorAll('.prog-step').forEach((p, idx) => {
     p.classList.remove('active', 'done');
     if (idx + 1 < step) p.classList.add('done');
@@ -459,115 +560,125 @@ function goToStep(step) {
   });
 }
 
-function connectGoogle() {
-  window.location.href = "/auth/google";
-}
+function connectGoogle() { window.location.href = "/auth/google"; }
 
 function showMsg(type, msg) {
   const errBox = document.getElementById('wa-err');
-  const okBox = document.getElementById('wa-ok');
-  errBox.classList.remove('active');
-  okBox.classList.remove('active');
-  
-  if (type === 'err') {
-    errBox.textContent = msg;
-    errBox.classList.add('active');
-  } else if (type === 'ok') {
-    okBox.textContent = msg;
-    okBox.classList.add('active');
-  }
+  const okBox  = document.getElementById('wa-ok');
+  errBox.classList.remove('active'); okBox.classList.remove('active');
+  if (type === 'err') { errBox.textContent = msg; errBox.classList.add('active'); }
+  else if (type === 'ok') { okBox.textContent = msg; okBox.classList.add('active'); }
+}
+
+function setVerify(id, status, msg) {
+  const icon = document.getElementById('vi-' + id);
+  const text = document.getElementById('vm-' + id);
+  if (!icon || !text) return;
+  if (status === 'ok')  { icon.className = 'v-icon ok';  icon.textContent = '✓'; }
+  if (status === 'err') { icon.className = 'v-icon err'; icon.textContent = '!'; }
+  text.textContent = msg;
 }
 
 async function verifyCredentials() {
   const data = {
-    wa_token: document.getElementById('wa_token').value,
-    wa_phone_id: document.getElementById('wa_phone_id').value,
-    wa_verify_token: document.getElementById('wa_verify_token').value,
-    wa_phone: document.getElementById('wa_phone').value,
-    sheet_id: document.getElementById('sheet_id').value,
-    alert_email: document.getElementById('alert_email').value
+    wa_token:          document.getElementById('wa_token').value,
+    wa_phone_id:       document.getElementById('wa_phone_id').value,
+    wa_verify_token:   document.getElementById('wa_verify_token').value,
+    wa_phone:          document.getElementById('wa_phone').value,
+    sheet_id:          document.getElementById('sheet_id').value,
+    alert_email:       document.getElementById('alert_email').value,
+    openai_api_key:    document.getElementById('openai_api_key').value,
+    fireflies_api_key: document.getElementById('fireflies_api_key').value
   };
-
   if(!data.wa_token || !data.wa_phone_id || !data.sheet_id) {
-    showMsg('err', 'Please fill all required fields before verifying.');
-    return;
+    showMsg('err', 'Please fill all required fields before verifying.'); return;
   }
-
-  const vbox = document.getElementById('vbox');
-  vbox.classList.add('active');
-  
-  document.getElementById('vi-wa').className = 'v-icon loading';
-  document.getElementById('vm-wa').textContent = 'Authenticating...';
-  document.getElementById('vi-sh').className = 'v-icon loading';
-  document.getElementById('vm-sh').textContent = 'Checking access...';
-
+  document.getElementById('vbox').classList.add('active');
+  ['wa','sh','oai','ff'].forEach(k => {
+    document.getElementById('vi-'+k).className = 'v-icon loading';
+    document.getElementById('vm-'+k).textContent = 'Checking...';
+  });
   try {
-    const res = await fetch('/setup/verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    const result = await res.json();
-
-    if(result.results?.whatsapp?.ok) {
-      document.getElementById('vi-wa').className = 'v-icon ok';
-      document.getElementById('vi-wa').textContent = '✓';
-      document.getElementById('vm-wa').textContent = 'Connected successfully.';
-    } else {
-      document.getElementById('vi-wa').className = 'v-icon err';
-      document.getElementById('vi-wa').textContent = '!';
-      document.getElementById('vm-wa').textContent = result.results?.whatsapp?.msg || 'Failed';
-    }
-
-    if(result.results?.sheets?.ok) {
-      document.getElementById('vi-sh').className = 'v-icon ok';
-      document.getElementById('vi-sh').textContent = '✓';
-      document.getElementById('vm-sh').textContent = 'Accessible.';
-    } else {
-      document.getElementById('vi-sh').className = 'v-icon err';
-      document.getElementById('vi-sh').textContent = '!';
-      document.getElementById('vm-sh').textContent = result.results?.sheets?.msg || 'Failed';
-    }
-  } catch (err) {
-    showMsg('err', 'Network error during verification.');
-  }
+    const res = await fetch('/setup/verify', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+    const r = await res.json();
+    setVerify('wa',  r.results?.whatsapp?.ok  ? 'ok' : 'err', r.results?.whatsapp?.msg  || 'N/A');
+    setVerify('sh',  r.results?.sheets?.ok    ? 'ok' : 'err', r.results?.sheets?.msg    || 'N/A');
+    setVerify('oai', r.results?.openai?.ok    ? 'ok' : 'err', r.results?.openai?.msg    || (data.openai_api_key ? 'Failed' : 'Not provided'));
+    setVerify('ff',  r.results?.fireflies?.ok ? 'ok' : 'err', r.results?.fireflies?.msg || (data.fireflies_api_key ? 'Failed' : 'Not provided'));
+  } catch(err) { showMsg('err', 'Network error during verification.'); }
 }
 
 async function saveConfig() {
   const data = {
-    wa_token: document.getElementById('wa_token').value,
-    wa_phone_id: document.getElementById('wa_phone_id').value,
-    wa_verify_token: document.getElementById('wa_verify_token').value,
-    wa_phone: document.getElementById('wa_phone').value,
-    sheet_id: document.getElementById('sheet_id').value,
-    alert_email: document.getElementById('alert_email').value
+    wa_token:          document.getElementById('wa_token').value,
+    wa_phone_id:       document.getElementById('wa_phone_id').value,
+    wa_verify_token:   document.getElementById('wa_verify_token').value,
+    wa_phone:          document.getElementById('wa_phone').value,
+    sheet_id:          document.getElementById('sheet_id').value,
+    alert_email:       document.getElementById('alert_email').value,
+    openai_api_key:    document.getElementById('openai_api_key').value,
+    fireflies_api_key: document.getElementById('fireflies_api_key').value
   };
-
   try {
-    const res = await fetch('/setup/whatsapp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    if(res.ok) {
-      goToStep(3);
-    } else {
-      const err = await res.json();
-      showMsg('err', err.detail || 'Failed to save configuration.');
-    }
-  } catch (err) {
-    showMsg('err', 'Network error while saving.');
+    const res = await fetch('/setup/whatsapp', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+    if(res.ok) { goToStep(3); }
+    else { const err = await res.json(); showMsg('err', err.detail || 'Failed to save configuration.'); }
+  } catch(err) { showMsg('err', 'Network error while saving.'); }
+}
+
+async function loadUsage() {
+  try {
+    const res  = await fetch('/usage');
+    const data = await res.json();
+
+    const tokens   = data.openai_tokens_used || 0;
+    const costUsd  = data.openai_cost_usd || 0;
+    const onlineMins  = data.online_meeting_minutes || 0;
+    const offlineMins = data.offline_meeting_minutes || 0;
+    const onlineCnt   = data.online_meetings_count || 0;
+    const offlineCnt  = data.offline_meetings_count || 0;
+    const costInr  = (costUsd * USD_TO_INR).toFixed(2);
+
+    document.getElementById('u-tokens').textContent    = tokens.toLocaleString();
+    document.getElementById('u-cost').textContent      = '$' + costUsd.toFixed(4);
+    document.getElementById('u-cost-inr').textContent  = '≈ ₹' + costInr + ' INR';
+    document.getElementById('u-online-mins').textContent  = onlineMins.toFixed(1);
+    document.getElementById('u-online-count').textContent = onlineCnt + ' live meeting(s) recorded';
+    document.getElementById('u-offline-mins').textContent  = offlineMins.toFixed(1);
+    document.getElementById('u-offline-count').textContent = offlineCnt + ' voice note(s) processed';
+
+    // Progress bar: 100K tokens as baseline
+    const pct = Math.min((tokens / 100000) * 100, 100);
+    document.getElementById('u-tokens-bar').style.width = pct + '%';
+
+    // Fireflies card
+    const ff = data.fireflies || {};
+    document.getElementById('ff-name').textContent  = ff.name  || 'Fireflies Account';
+    document.getElementById('ff-email').textContent = ff.email || 'Add your Fireflies API key in Setup to see details';
+    document.getElementById('ff-mins').textContent  = ff.minutes_consumed != null ? ff.minutes_consumed : '—';
+
+    // Cost table
+    const totalMins = onlineMins + offlineMins;
+    const ffCostNote = totalMins <= 800 ? 'Free tier (≤800 mins/mo)' : 'Over free limit — check Fireflies plan';
+    document.getElementById('cost-table-body').innerHTML = `
+      <tr><td>GPT-4o (Input)</td><td>${tokens.toLocaleString()} tokens</td><td>$0.005/1K</td><td class="gold">$${(tokens/1000*0.005).toFixed(4)}</td></tr>
+      <tr><td>GPT-4o (Output est.)</td><td>~30% of tokens</td><td>$0.015/1K</td><td class="gold">$${(tokens*0.3/1000*0.015).toFixed(4)}</td></tr>
+      <tr><td>Whisper (Voice)</td><td>${offlineMins.toFixed(1)} mins</td><td>$0.006/min</td><td class="gold">$${(offlineMins*0.006).toFixed(4)}</td></tr>
+      <tr><td>Fireflies.ai</td><td>${totalMins.toFixed(1)} meeting mins</td><td>Free/Pro plan</td><td class="gold">${ffCostNote}</td></tr>
+      <tr style="background:rgba(212,175,55,0.05);"><td><strong>Total Estimated</strong></td><td></td><td></td><td class="gold"><strong>$${costUsd.toFixed(4)} ≈ ₹${costInr}</strong></td></tr>
+    `;
+  } catch(e) {
+    console.error('Usage fetch failed:', e);
   }
 }
 
-// Check URL params for google auth status
 window.onload = function() {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('google') === 'ok') {
     document.getElementById('gstatus').textContent = 'Connected';
     document.getElementById('gstatus').className = 'g-status connected';
   }
-}
+};
 </script>
 </body>
 </html>
