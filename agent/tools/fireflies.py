@@ -139,7 +139,7 @@ async def poll_and_deliver_transcript(meeting_name: str, client_data: dict = Non
                     f"✅ *Action Items:*\n{actions}"
                 )
                 try:
-                    from agent.whatsapp import send_whatsapp_message
+                    from agent.tools.whatsapp import send_whatsapp_message
                     await send_whatsapp_message(wa_phone, msg, client_data=client_data)
                     if client_id and dur > 0:
                         from agent.database import add_meeting_minutes
