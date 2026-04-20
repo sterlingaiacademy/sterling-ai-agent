@@ -17,69 +17,53 @@ def _get_headers(client_data: dict = None) -> dict:
 
 async def invite_bot_to_meeting(meeting_url: str, meeting_name: str = "Meeting", client_data: dict = None):
     """Send Fireflies bot to join a Google Meet / Zoom / Teams meeting."""
+    # Confirmed by live API test: Fireflies requires 'meeting_link' (NOT 'meeting_url')
     headers = _get_headers(client_data)
-    print(f"[Fireflies] Attempting to send bot to: {meeting_url}")
+    print(f"[Fireflies] Sending bot to: {meeting_url}")
 
-    # Fireflies API accepts 'meeting_url' (v2) — inline arg, no title field in schema
-    # We try both field names since API version varies per account
-    attempts = [
-        # v2 style
-        '{ "query": "mutation { addToLiveMeeting(meeting_url: \\"%s\\") { success message } }" }' % meeting_url.replace('"', '\\"'),
-        # v1 style (older accounts)
-        '{ "query": "mutation { addToLiveMeeting(meeting_link: \\"%s\\") { success message } }" }' % meeting_url.replace('"', '\\"'),
-    ]
+    query = 'mutation { addToLiveMeeting(meeting_link: "%s") { success message } }' % meeting_url.replace('"', '\\"')
 
-    last_data = {}
-    for i, raw_body in enumerate(attempts):
-        try:
-            resp = requests.post(
-                FIREFLIES_API,
-                data=raw_body,
-                headers=headers,
-                timeout=15
+    try:
+        resp = requests.post(
+            FIREFLIES_API,
+            json={"query": query},
+            headers=headers,
+            timeout=15
+        )
+        data = resp.json()
+        print(f"[Fireflies] response ({resp.status_code}): {data}")
+
+        result = (data.get("data") or {}).get("addToLiveMeeting") or {}
+        errors  = data.get("errors") or []
+
+        if result.get("success"):
+            if client_data and client_data.get("id"):
+                from agent.database import add_meeting_minutes
+                add_meeting_minutes(client_data["id"], "online", 0, 1)
+            import asyncio
+            asyncio.create_task(poll_and_deliver_transcript(meeting_name, client_data))
+            return (
+                "Your Fireflies AI notetaker is joining *'" + meeting_name + "'* now.\n"
+                "It may take up to 1 minute to appear. Once the meeting ends, "
+                "I'll send you a full summary and transcript automatically."
             )
-            last_data = resp.json()
-            print(f"[Fireflies] attempt {i+1} response ({resp.status_code}): {last_data}")
+        else:
+            if errors:
+                error_msg = errors[0].get("message", "Unknown error")
+            else:
+                error_msg = result.get("message") or "Unknown error"
+            print(f"[Fireflies] error: {error_msg}")
+            return (
+                "Could not join meeting: " + error_msg + "\n\n"
+                "Make sure:\n"
+                "- The meeting is currently live (bot can only join active meetings)\n"
+                "- The link is a valid Google Meet / Zoom / Teams URL\n"
+                "- Your Fireflies API key is correct (Setup Step 3)"
+            )
+    except Exception as e:
+        print(f"[Fireflies] exception: {e}")
+        return "Could not reach Fireflies API. Please try again in a moment."
 
-            result = (last_data.get("data") or {}).get("addToLiveMeeting") or {}
-            errors  = last_data.get("errors") or []
-
-            if result.get("success"):
-                if client_data and client_data.get("id"):
-                    from agent.database import add_meeting_minutes
-                    add_meeting_minutes(client_data["id"], "online", 0, 1)
-                import asyncio
-                asyncio.create_task(poll_and_deliver_transcript(meeting_name, client_data))
-                return (
-                    f"✅ Fred (your Fireflies AI notetaker) is joining *'{meeting_name}'* now.\n"
-                    f"It will record and transcribe the meeting. Once it ends, I'll send you a full summary automatically."
-                )
-
-            # If it's an auth error don't retry
-            if errors and any("auth" in (e.get("message","")).lower() for e in errors):
-                error_msg = errors[0].get("message","Auth error")
-                print(f"[Fireflies] Auth error — stopping retries: {error_msg}")
-                return f"❌ Fireflies auth failed: {error_msg}. Please re-enter your Fireflies API key in Setup Step 3."
-
-        except Exception as e:
-            print(f"[Fireflies] attempt {i+1} exception: {e}")
-            last_data = {}
-
-    # All attempts failed — extract best error message
-    errors = last_data.get("errors") or []
-    result = (last_data.get("data") or {}).get("addToLiveMeeting") or {}
-    if errors:
-        error_msg = errors[0].get("message", "Unknown API error")
-    else:
-        error_msg = result.get("message") or "No response from Fireflies API"
-
-    return (
-        f"❌ Fireflies bot could not join the meeting: {error_msg}\n\n"
-        f"*Possible reasons:*\n"
-        f"• The meeting hasn't started yet (bot can only join live meetings)\n"
-        f"• The API key is invalid — check Setup Step 3\n"
-        f"• Google Meet links must be in the format: meet.google.com/xxx-xxxx-xxx"
-    )
 
 
 async def poll_and_deliver_transcript(meeting_name: str, client_data: dict = None, max_wait_mins: int = 120):
