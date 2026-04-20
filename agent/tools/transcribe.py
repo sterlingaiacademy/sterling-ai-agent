@@ -55,7 +55,7 @@ async def transcribe_and_save(
     audio_url = supabase.storage.from_("recordings").get_public_url(filename)
     print(f"[Transcribe] Audio stored: {audio_url}")
 
-    # Step 3: Transcribe with Whisper
+    # Step 3: Transcribe with Whisper (verbose_json gives real duration)
     print(f"[Transcribe] Transcribing with Whisper...")
     import tempfile, os as _os
     with tempfile.NamedTemporaryFile(suffix=".ogg", delete=False) as tmp:
@@ -65,15 +65,25 @@ async def transcribe_and_save(
     with open(tmp_path, "rb") as audio_file:
         transcript_response = ai_client.audio.transcriptions.create(
             model="whisper-1",
-            file=audio_file
+            file=audio_file,
+            response_format="verbose_json"
         )
     _os.unlink(tmp_path)
     transcript_text = transcript_response.text
     print(f"[Transcribe] Transcript: {transcript_text[:100]}...")
 
-    # Step 4: Estimate audio duration in minutes (rough: ~150 words/min speech)
-    word_count = len(transcript_text.split())
-    estimated_minutes = round(word_count / 150, 2)
+    # Step 4: Get actual audio duration from Whisper response (in seconds → minutes)
+    try:
+        duration_seconds = float(transcript_response.duration)
+        estimated_minutes = round(duration_seconds / 60, 2)
+    except Exception:
+        # Fallback: estimate from word count (~150 words/min)
+        word_count = len(transcript_text.split())
+        estimated_minutes = round(word_count / 150, 2)
+    # Safety floor: at least 0.5 min if any audio was processed
+    if estimated_minutes == 0.0 and len(audio_bytes) > 0:
+        estimated_minutes = 0.5
+    print(f"[Transcribe] Duration: {estimated_minutes} minutes")
 
     # Step 5: Summarize and extract action items with GPT
     print(f"[Transcribe] Summarizing...")
