@@ -53,6 +53,23 @@ def clear_pending_audio(wa_phone: str):
 
 # ── Usage Tracking ─────────────────────────────────────────────────────────────
 
+# Human-readable labels for each tool name
+EVENT_LABELS = {
+    "send_email":              "📧 Send Email",
+    "log_expense":             "💰 Log Expense",
+    "create_calendar_event":   "📅 Create Calendar Event",
+    "get_calendar_events":     "📅 View Calendar",
+    "get_emails":              "📬 Read Emails",
+    "get_email_body":          "📖 Read Email Body",
+    "invite_bot_to_meeting":   "🎥 Join Meeting (Online)",
+    "save_meeting_recording":  "🎙️ Transcribe Voice Note",
+    "get_meeting_summary":     "📋 Get Meeting Summary",
+    "get_all_meetings":        "📋 List All Meetings",
+    "get_meeting_transcripts": "🔥 Get Online Transcripts",
+    "get_transcript_detail":   "🔥 Get Transcript Detail",
+    "search_web":              "🔍 Web Search",
+}
+
 def increment_openai_usage(client_id: str, tokens: int, cost_usd: float):
     """Add to the cumulative OpenAI token + cost counters for a client."""
     try:
@@ -104,3 +121,65 @@ def get_usage_stats(client_id: str) -> dict:
     except Exception as e:
         print(f"[Usage] Failed to get usage stats: {e}")
         return {}
+
+def log_usage_event(client_id: str, tool_name: str, tokens: int, cost_usd: float):
+    """Log a single tool-level usage event to the usage_events table."""
+    try:
+        label = EVENT_LABELS.get(tool_name, f"⚡ {tool_name.replace('_', ' ').title()}")
+        supabase.table("usage_events").insert({
+            "client_id":   client_id,
+            "tool_name":   tool_name,
+            "event_label": label,
+            "tokens":      tokens,
+            "cost_usd":    cost_usd,
+        }).execute()
+    except Exception as e:
+        print(f"[Usage] Failed to log event: {e}")
+
+def get_usage_events(client_id: str, limit: int = 30) -> list:
+    """Get recent usage events (most recent first) for a client."""
+    try:
+        result = supabase.table("usage_events")\
+            .select("tool_name, event_label, tokens, cost_usd, created_at")\
+            .eq("client_id", client_id)\
+            .order("created_at", desc=True)\
+            .limit(limit)\
+            .execute()
+        return result.data or []
+    except Exception as e:
+        print(f"[Usage] Failed to get events: {e}")
+        return []
+
+def get_usage_events_summary(client_id: str) -> list:
+    """Get token usage aggregated by event type, sorted by total tokens desc."""
+    try:
+        result = supabase.table("usage_events")\
+            .select("event_label, tokens, cost_usd")\
+            .eq("client_id", client_id)\
+            .execute()
+        agg: dict = {}
+        for row in (result.data or []):
+            lbl = row["event_label"]
+            if lbl not in agg:
+                agg[lbl] = {"event_label": lbl, "total_tokens": 0, "total_cost": 0.0, "count": 0}
+            agg[lbl]["total_tokens"] += row.get("tokens", 0)
+            agg[lbl]["total_cost"]   += row.get("cost_usd", 0.0)
+            agg[lbl]["count"]        += 1
+        return sorted(agg.values(), key=lambda x: x["total_tokens"], reverse=True)
+    except Exception as e:
+        print(f"[Usage] Failed to get events summary: {e}")
+        return []
+
+def get_meetings_list(wa_phone: str, limit: int = 20) -> list:
+    """Get offline voice-note meeting recordings for a user."""
+    try:
+        result = supabase.table("meeting_transcripts")\
+            .select("meeting_name, created_at, summary")\
+            .eq("wa_phone", wa_phone)\
+            .order("created_at", desc=True)\
+            .limit(limit)\
+            .execute()
+        return result.data or []
+    except Exception as e:
+        print(f"[Usage] Failed to get meetings list: {e}")
+        return []

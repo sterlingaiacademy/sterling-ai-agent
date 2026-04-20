@@ -380,8 +380,18 @@ async def run_agent(user_message: str, phone: str, client_data: dict):
 
     # ── Persist usage stats ───────────────────────────────────────────────────
     if client_id and total_tokens_used > 0:
-        from agent.database import increment_openai_usage
+        from agent.database import increment_openai_usage, log_usage_event
         increment_openai_usage(client_id, total_tokens_used, total_cost_usd)
+        # Log each tool call with a proportional share of tokens
+        if reply_message.tool_calls:
+            try:
+                num_tools   = len(reply_message.tool_calls)
+                per_tokens  = total_tokens_used // max(num_tools, 1)
+                per_cost    = round(total_cost_usd / max(num_tools, 1), 6)
+                for tc in reply_message.tool_calls:
+                    log_usage_event(client_id, tc.function.name, per_tokens, per_cost)
+            except Exception as _le:
+                print(f"[Usage] Event log error: {_le}")
 
     # ── Deduplication guard: skip if this exact reply was just sent ──
     last = _last_reply.get(phone)

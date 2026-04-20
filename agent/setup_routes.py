@@ -65,6 +65,58 @@ async def usage_stats(request: Request):
     })
 
 
+# ── Usage events drill-down API ───────────────────────────────────────────────
+@router.get("/usage/events")
+async def usage_events_detail(request: Request):
+    client_id = request.session.get("client_id")
+    if not client_id:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+    from agent.database import get_usage_events, get_usage_events_summary
+    summary = get_usage_events_summary(client_id)
+    events  = get_usage_events(client_id, limit=30)
+    return JSONResponse({"summary": summary, "events": events})
+
+
+# ── Meetings list API ─────────────────────────────────────────────────────────
+@router.get("/usage/meetings")
+async def usage_meetings(request: Request):
+    client_id = request.session.get("client_id")
+    if not client_id:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+
+    client_email = request.session.get("client_email")
+    from agent.database import get_client_by_email as _gce, get_meetings_list
+    client   = _gce(client_email)
+    wa_phone = (client or {}).get("wa_phone")
+
+    offline = get_meetings_list(wa_phone) if wa_phone else []
+
+    # Fetch online meetings from Fireflies
+    online = []
+    try:
+        if client and client.get("fireflies_api_key"):
+            import requests as _req
+            q = """query { transcripts(limit: 10) {
+                id title date duration participants { name }
+            } }"""
+            resp = _req.post(
+                "https://api.fireflies.ai/graphql",
+                json={"query": q},
+                headers={
+                    "Authorization": f"Bearer {client['fireflies_api_key']}",
+                    "Content-Type": "application/json"
+                },
+                timeout=10
+            )
+            data = resp.json()
+            online = data.get("data", {}).get("transcripts") or []
+    except Exception as e:
+        print(f"[Usage] Fireflies meetings fetch error: {e}")
+
+    return JSONResponse({"offline": offline, "online": online})
+
+
+
 # ── Verify credentials ────────────────────────────────────────────────────────
 @router.post("/setup/verify")
 async def verify_credentials(config: WhatsAppConfig, request: Request):
