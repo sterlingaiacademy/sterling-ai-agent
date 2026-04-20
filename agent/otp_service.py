@@ -15,7 +15,7 @@ def generate_otp() -> str:
     return str(random.randint(100000, 999999))
 
 
-def send_otp_email(email: str, otp: str) -> bool:
+def send_otp_email(email: str, otp: str, subject: str = "Your Sterling AI verification code") -> bool:
     """Send a 6-digit OTP to the user's email via Gmail SMTP."""
     smtp_email    = os.getenv("SMTP_EMAIL")
     smtp_password = os.getenv("SMTP_PASSWORD")
@@ -26,7 +26,7 @@ def send_otp_email(email: str, otp: str) -> bool:
 
     try:
         msg = MIMEMultipart("alternative")
-        msg["Subject"] = "Your Sterling AI verification code"
+        msg["Subject"] = subject
         msg["From"]    = f"Sterling AI <{smtp_email}>"
         msg["To"]      = email
 

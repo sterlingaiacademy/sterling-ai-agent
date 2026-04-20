@@ -17,14 +17,16 @@ def _get_headers(client_data: dict = None) -> dict:
 
 async def invite_bot_to_meeting(meeting_url: str, meeting_name: str = "Meeting", client_data: dict = None):
     """Send Fireflies bot to join a Google Meet / Zoom / Teams meeting."""
+    # Fireflies v2 API mutation — field is 'meeting_url' (not 'meeting_link')
     query = """
     mutation AddToLiveMeeting($url: String!, $title: String!) {
-        addToLiveMeeting(meeting_link: $url, title: $title) {
+        addToLiveMeeting(meeting_url: $url, title: $title) {
             success
             message
         }
     }
     """
+    print(f"[Fireflies] Sending bot to: {meeting_url}")
     response = requests.post(
         FIREFLIES_API,
         json={
@@ -38,25 +40,102 @@ async def invite_bot_to_meeting(meeting_url: str, meeting_name: str = "Meeting",
         timeout=15
     )
     data = response.json()
+    print(f"[Fireflies] invite response: {data}")
+
     result = (data.get("data") or {}).get("addToLiveMeeting") or {}
+    errors = data.get("errors", [])
 
     if result.get("success"):
-        # Track online meeting — we don't know duration yet, count the invite
         if client_data and client_data.get("id"):
             from agent.database import add_meeting_minutes
             add_meeting_minutes(client_data["id"], "online", 0, 1)
-        return f"✅ Your assistant is joining your meeting: '{meeting_name}'. It will record and transcribe automatically."
+        # Schedule background transcript delivery
+        import asyncio
+        asyncio.create_task(
+            poll_and_deliver_transcript(meeting_name, client_data)
+        )
+        return f"✅ Fred (your Fireflies AI) is joining *'{meeting_name}'* now. Once the meeting ends, I'll send you a full transcript and summary automatically."
     else:
-        errors = data.get("errors", [])
-        if isinstance(errors, list) and len(errors) > 0:
+        if isinstance(errors, list) and errors:
             error_msg = errors[0].get("message", "Unknown error")
         else:
             error_msg = result.get("message") or "Unknown error"
-        return f"❌ Could not join meeting: {error_msg}"
+        print(f"[Fireflies] invite error: {error_msg}")
+        return f"❌ Could not join meeting: {error_msg}. Please check your Fireflies API key and ensure the meeting URL is valid (Google Meet, Zoom, or Teams)."
+
+async def poll_and_deliver_transcript(meeting_name: str, client_data: dict = None, max_wait_mins: int = 120):
+    """
+    Polls Fireflies every 5 minutes (up to max_wait_mins) after a meeting is invited.
+    When the transcript appears, sends a summary back to the user via WhatsApp.
+    """
+    import asyncio
+    from datetime import datetime, timezone
+
+    headers = _get_headers(client_data)
+    wa_phone = (client_data or {}).get("wa_phone")
+    client_id = (client_data or {}).get("id")
+    if not wa_phone:
+        return
+
+    query = """
+    query GetTranscripts {
+        transcripts(limit: 5) {
+            id title date duration
+            summary { overview action_items }
+        }
+    }
+    """
+    poll_interval = 5 * 60   # 5 minutes
+    max_polls     = max_wait_mins // 5
+    seen_ids      = set()
+
+    # Seed seen IDs so we only alert on NEW transcripts
+    try:
+        seed = requests.post(FIREFLIES_API, json={"query": query}, headers=headers, timeout=10).json()
+        for t in (seed.get("data") or {}).get("transcripts") or []:
+            seen_ids.add(t["id"])
+    except Exception:
+        pass
+
+    for _ in range(max_polls):
+        await asyncio.sleep(poll_interval)
+        try:
+            resp = requests.post(FIREFLIES_API, json={"query": query}, headers=headers, timeout=10).json()
+            transcripts = (resp.get("data") or {}).get("transcripts") or []
+            for t in transcripts:
+                if t["id"] in seen_ids:
+                    continue
+                if meeting_name.lower() not in (t.get("title") or "").lower():
+                    continue
+                # New transcript found for this meeting!
+                seen_ids.add(t["id"])
+                dur  = round(float(t.get("duration") or 0), 1)
+                summ = (t.get("summary") or {})
+                overview  = summ.get("overview")  or "No summary available."
+                actions   = summ.get("action_items") or "None noted."
+                msg = (
+                    f"📋 *Meeting Transcript Ready: {t.get('title', meeting_name)}*\n"
+                    f"⏱ Duration: {dur} mins\n\n"
+                    f"📝 *Summary:*\n{overview}\n\n"
+                    f"✅ *Action Items:*\n{actions}"
+                )
+                try:
+                    from agent.whatsapp import send_whatsapp_message
+                    await send_whatsapp_message(wa_phone, msg, client_data=client_data)
+                    if client_id and dur > 0:
+                        from agent.database import add_meeting_minutes
+                        add_meeting_minutes(client_id, "online", dur, 0)
+                except Exception as we:
+                    print(f"[Fireflies] Failed to send transcript to {wa_phone}: {we}")
+                return  # done
+        except Exception as pe:
+            print(f"[Fireflies] Poll error: {pe}")
+
 
 
 async def upload_audio_to_fireflies(audio_url: str, meeting_name: str, client_data: dict = None):
     """Upload a recorded audio file to Fireflies for transcription."""
+
 
     print(f"[Fireflies] Uploading: {meeting_name} | URL: {audio_url}")
 

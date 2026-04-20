@@ -1490,8 +1490,26 @@
       <button class="nav-link" onclick="showPage('usage', this)">Usage</button>
       <button class="nav-link" onclick="showPage('guide', this)">Guide</button>
       <a href="/logout" class="nav-out">Sign Out</a>
+      <button class="nav-out" onclick="openDeleteModal()" style="background:none;border:none;cursor:pointer;color:#ff4d4d;font-size:13px;font-weight:600;padding:8px 16px;border-radius:20px;border:1px solid rgba(255,77,77,0.3);margin-left:8px;transition:all .2s;" onmouseover="this.style.background='rgba(255,77,77,0.1)'" onmouseout="this.style.background='none'">Delete Account</button>
     </div>
   </nav>
+
+  <!-- Delete Account Modal -->
+  <div id="delete-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:none;align-items:center;justify-content:center;">
+    <div style="background:#111;border:1px solid rgba(255,77,77,0.4);border-radius:20px;padding:40px;max-width:420px;width:90%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.6);">
+      <div style="font-size:40px;margin-bottom:16px;">⚠️</div>
+      <h2 style="font-family:'Cormorant Garamond',serif;color:#ff4d4d;margin-bottom:12px;font-size:26px;">Delete Account</h2>
+      <p style="color:#a0a0a0;font-size:14px;line-height:1.7;margin-bottom:24px;">This will permanently erase your account, all your configuration, usage history, and data. <strong style="color:#fff;">This cannot be undone.</strong></p>
+      <p style="color:#a0a0a0;font-size:13px;margin-bottom:10px;">Type <strong style="color:#ff4d4d;letter-spacing:2px;">DELETE</strong> to confirm:</p>
+      <input id="delete-confirm-input" type="text" placeholder="DELETE" style="width:100%;padding:12px 16px;border:1px solid rgba(255,77,77,0.4);border-radius:10px;background:rgba(255,77,77,0.05);color:#fff;font-size:16px;text-align:center;letter-spacing:3px;font-weight:700;outline:none;margin-bottom:24px;"/>
+      <div style="display:flex;gap:12px;">
+        <button onclick="closeDeleteModal()" style="flex:1;padding:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Cancel</button>
+        <form method="POST" action="/account/delete" style="flex:1;">
+          <button id="delete-confirm-btn" type="submit" disabled style="width:100%;padding:14px;background:#ff4d4d;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:not-allowed;opacity:0.4;transition:all .2s;">Delete Forever</button>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <!-- SETUP PAGE -->
   <div class="page active" id="page-setup">
@@ -2265,6 +2283,37 @@
     function toggleMenu() {
       document.getElementById('navMenu').classList.toggle('show');
     }
+
+    function openDeleteModal() {
+      const m = document.getElementById('delete-modal');
+      m.style.display = 'flex';
+      document.getElementById('delete-confirm-input').value = '';
+      document.getElementById('delete-confirm-btn').disabled = true;
+      document.getElementById('delete-confirm-btn').style.opacity = '0.4';
+      document.getElementById('delete-confirm-btn').style.cursor = 'not-allowed';
+      document.getElementById('delete-confirm-input').focus();
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('delete-modal').style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const inp = document.getElementById('delete-confirm-input');
+      if (inp) {
+        inp.addEventListener('input', function() {
+          const btn = document.getElementById('delete-confirm-btn');
+          const ok  = this.value.trim() === 'DELETE';
+          btn.disabled = !ok;
+          btn.style.opacity = ok ? '1' : '0.4';
+          btn.style.cursor  = ok ? 'pointer' : 'not-allowed';
+        });
+      }
+      // Close modal on backdrop click
+      document.getElementById('delete-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteModal();
+      });
+    });
 
     function toggleGuide(id) {
       const section = document.getElementById(id);

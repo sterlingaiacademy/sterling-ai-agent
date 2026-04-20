@@ -406,9 +406,15 @@ input:focus {
               <label>Email Address</label>
               <input type="email" name="email" placeholder="you@example.com" required/>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="position:relative;">
               <label>Password</label>
-              <input type="password" name="password" placeholder="••••••••" required/>
+              <div style="position:relative;">
+                <input type="password" name="password" id="login-pw" placeholder="••••••••" required style="padding-right:44px;"/>
+                <button type="button" onclick="togglePw('login-pw',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#666;cursor:pointer;font-size:16px;">👁</button>
+              </div>
+            </div>
+            <div style="text-align:right;margin:-8px 0 20px;">
+              <a href="/forgot-password" style="font-size:13px;color:#a0a0a0;text-decoration:none;">Forgot password?</a>
             </div>
             <button class="btn-submit" type="submit">Access Dashboard</button>
           </form>
@@ -421,9 +427,12 @@ input:focus {
               <label>Email Address</label>
               <input type="email" name="email" placeholder="you@example.com" required/>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="position:relative;">
               <label>Create Password</label>
-              <input type="password" name="password" placeholder="Choose a strong password" required/>
+              <div style="position:relative;">
+                <input type="password" name="password" id="reg-pw" placeholder="Choose a strong password" required style="padding-right:44px;"/>
+                <button type="button" onclick="togglePw('reg-pw',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#666;cursor:pointer;font-size:16px;">👁</button>
+              </div>
             </div>
             <button class="btn-submit" type="submit">Begin Your Journey</button>
           </form>
@@ -439,6 +448,11 @@ input:focus {
     document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));
     document.getElementById('panel-'+t).classList.add('active');
     event.target.classList.add('active');
+  }
+  function togglePw(id,btn){
+    const inp=document.getElementById(id);
+    inp.type=inp.type==='password'?'text':'password';
+    btn.textContent=inp.type==='password'?'👁':'🙈';
   }
   const err = new URLSearchParams(window.location.search).get('error');
   if(err){ const el=document.getElementById('err'); el.textContent=err; el.style.display='block'; }
@@ -634,3 +648,196 @@ async def verify_otp_post(request: Request):
 async def logout(request: Request):
     request.session.clear()
     return RedirectResponse("/login", status_code=302)
+
+
+# ── Forgot password (send reset OTP) ─────────────────────────────────────────
+@router.get("/forgot-password")
+async def forgot_password_page(request: Request):
+    return HTMLResponse("""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reset Password · Sterling AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--surface:rgba(20,20,20,0.7);--border:rgba(212,175,55,0.2);--text:#fff;--text-muted:#a0a0a0;--gold:#d4af37;--gold-dark:#aa8c2c;--err:#ff4d4d;--err-bg:rgba(255,77,77,0.1);}
+body{background:var(--bg);background-image:radial-gradient(circle at 50% 50%,rgba(212,175,55,0.06),transparent 50%);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.card{background:var(--surface);backdrop-filter:blur(16px);border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,0.3);border-radius:24px;padding:48px 40px;width:100%;max-width:420px;text-align:center;}
+.logo{width:44px;height:44px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:12px;display:inline-flex;align-items:center;justify-content:center;color:#000;font-size:20px;font-weight:700;margin-bottom:24px;}
+h1{font-family:'Playfair Display',serif;font-size:28px;color:var(--gold);margin-bottom:12px;}
+p.sub{color:var(--text-muted);font-size:14px;margin-bottom:32px;line-height:1.6;}
+.form-group{margin-bottom:20px;text-align:left;}
+label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:8px;}
+input{width:100%;padding:14px 16px;border:1px solid var(--border);border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--text);background:rgba(0,0,0,0.2);outline:none;transition:all .3s;}
+input:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(212,175,55,0.2);}
+.btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#000;border:none;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:12px;transition:all .3s;text-transform:uppercase;letter-spacing:1px;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(212,175,55,0.3);}
+.back{display:block;margin-top:20px;color:var(--text-muted);font-size:13px;text-decoration:none;}
+.back:hover{color:var(--gold);}
+.error{background:var(--err-bg);border:1px solid rgba(255,77,77,.3);color:var(--err);padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:20px;display:none;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">S</div>
+  <h1>Reset Password</h1>
+  <p class="sub">Enter your email and we'll send a verification code to reset your password.</p>
+  <div id="err" class="error"></div>
+  <form method="POST" action="/forgot-password">
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" name="email" placeholder="you@example.com" required/>
+    </div>
+    <button class="btn" type="submit">Send Reset Code</button>
+  </form>
+  <a class="back" href="/login">← Back to Sign In</a>
+</div>
+<script>
+  const e=new URLSearchParams(window.location.search).get('error');
+  if(e){const el=document.getElementById('err');el.textContent=e;el.style.display='block';}
+</script>
+</body>
+</html>
+""")
+
+
+@router.post("/forgot-password")
+async def forgot_password_post(request: Request):
+    form  = await request.form()
+    email = form.get("email", "").strip()
+    client = get_client_by_email(email)
+    if not client:
+        return RedirectResponse("/forgot-password?error=No+account+found+with+that+email.", status_code=302)
+
+    otp  = generate_otp()
+    sent = send_otp_email(email, otp, subject="Sterling AI — Password Reset Code")
+    if not sent:
+        return RedirectResponse("/forgot-password?error=Failed+to+send+email.+Try+again.", status_code=302)
+
+    store_otp_data(email, otp, client["password_hash"])   # reuse existing hash slot
+    request.session["reset_email"] = email
+    return RedirectResponse("/reset-password", status_code=302)
+
+
+# ── Reset password (enter new password after OTP) ─────────────────────────────
+@router.get("/reset-password")
+async def reset_password_page(request: Request):
+    if not request.session.get("reset_email"):
+        return RedirectResponse("/forgot-password", status_code=302)
+    return HTMLResponse("""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>New Password · Sterling AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--surface:rgba(20,20,20,0.7);--border:rgba(212,175,55,0.2);--text:#fff;--text-muted:#a0a0a0;--gold:#d4af37;--gold-dark:#aa8c2c;--err:#ff4d4d;--err-bg:rgba(255,77,77,0.1);}
+body{background:var(--bg);background-image:radial-gradient(circle at 50% 50%,rgba(212,175,55,0.06),transparent 50%);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.card{background:var(--surface);backdrop-filter:blur(16px);border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,0.3);border-radius:24px;padding:48px 40px;width:100%;max-width:420px;text-align:center;}
+.logo{width:44px;height:44px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:12px;display:inline-flex;align-items:center;justify-content:center;color:#000;font-size:20px;font-weight:700;margin-bottom:24px;}
+h1{font-family:'Playfair Display',serif;font-size:28px;color:var(--gold);margin-bottom:12px;}
+p.sub{color:var(--text-muted);font-size:14px;margin-bottom:32px;line-height:1.6;}
+.form-group{margin-bottom:20px;text-align:left;position:relative;}
+label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:8px;}
+.pw-wrap{position:relative;}
+input{width:100%;padding:14px 44px 14px 16px;border:1px solid var(--border);border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--text);background:rgba(0,0,0,0.2);outline:none;transition:all .3s;}
+input:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(212,175,55,0.2);}
+.eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;padding:4px;}
+.eye-btn:hover{color:var(--gold);}
+.btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#000;border:none;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:12px;transition:all .3s;text-transform:uppercase;letter-spacing:1px;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(212,175,55,0.3);}
+.error{background:var(--err-bg);border:1px solid rgba(255,77,77,.3);color:var(--err);padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:20px;display:none;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">S</div>
+  <h1>Set New Password</h1>
+  <p class="sub">Enter the 6-digit code we sent you, then choose a new password.</p>
+  <div id="err" class="error"></div>
+  <form method="POST" action="/reset-password">
+    <div class="form-group">
+      <label>Verification Code</label>
+      <input type="text" name="otp" placeholder="······" maxlength="6" required style="letter-spacing:8px;text-align:center;font-size:22px;"/>
+    </div>
+    <div class="form-group">
+      <label>New Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="np" name="new_password" placeholder="Choose a strong password" required/>
+        <button type="button" class="eye-btn" onclick="togglePw('np',this)">👁</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Confirm Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="cp" name="confirm_password" placeholder="Repeat password" required/>
+        <button type="button" class="eye-btn" onclick="togglePw('cp',this)">👁</button>
+      </div>
+    </div>
+    <button class="btn" type="submit">Reset Password</button>
+  </form>
+</div>
+<script>
+  const e=new URLSearchParams(window.location.search).get('error');
+  if(e){const el=document.getElementById('err');el.textContent=e;el.style.display='block';}
+  function togglePw(id,btn){
+    const inp=document.getElementById(id);
+    inp.type=inp.type==='password'?'text':'password';
+    btn.textContent=inp.type==='password'?'👁':'🙈';
+  }
+</script>
+</body>
+</html>
+""")
+
+
+@router.post("/reset-password")
+async def reset_password_post(request: Request):
+    form     = await request.form()
+    otp_in   = form.get("otp", "").strip()
+    new_pw   = form.get("new_password", "")
+    conf_pw  = form.get("confirm_password", "")
+    email    = request.session.get("reset_email")
+
+    if not email:
+        return RedirectResponse("/forgot-password?error=Session+expired.", status_code=302)
+    if new_pw != conf_pw:
+        return RedirectResponse("/reset-password?error=Passwords+do+not+match.", status_code=302)
+    if len(new_pw) < 8:
+        return RedirectResponse("/reset-password?error=Password+must+be+at+least+8+characters.", status_code=302)
+
+    record = verify_otp(email, otp_in)
+    if not record:
+        return RedirectResponse("/reset-password?error=Invalid+or+expired+code.", status_code=302)
+
+    new_hash = bcrypt.hashpw(new_pw.encode(), bcrypt.gensalt()).decode()
+    from agent.database import supabase as _db
+    _db.table("clients").update({"password_hash": new_hash}).eq("email", email).execute()
+    clear_otp_data(email)
+    request.session.pop("reset_email", None)
+    return RedirectResponse("/login?error=Password+reset+successful.+Please+sign+in.", status_code=302)
+
+
+# ── Delete account permanently ────────────────────────────────────────────────
+@router.post("/account/delete")
+async def delete_account(request: Request):
+    client_id = request.session.get("client_id")
+    email     = request.session.get("client_email")
+    if not client_id:
+        return RedirectResponse("/login", status_code=302)
+    try:
+        from agent.database import supabase as _db
+        # Delete usage events first (FK)
+        _db.table("usage_events").delete().eq("client_id", client_id).execute()
+        # Delete client row
+        _db.table("clients").delete().eq("id", client_id).execute()
+    except Exception as e:
+        print(f"[Delete] Error deleting account {email}: {e}")
+    request.session.clear()
+    return RedirectResponse("/login?error=Your+account+has+been+permanently+deleted.", status_code=302)
