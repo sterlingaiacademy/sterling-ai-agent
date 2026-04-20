@@ -160,12 +160,37 @@ body::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%;
 .tier-features li i { color: var(--gold); font-style: normal; font-weight: bold; }
 
 /* GUIDE */
-.guide-content { max-width: 800px; margin: 0 auto; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 20px; padding: 50px; line-height: 1.8; color: var(--text-muted); }
-.guide-content h2 { font-family: 'Cormorant Garamond', serif; font-size: 32px; color: var(--gold); margin-bottom: 20px; margin-top: 40px; }
-.guide-content h2:first-child { margin-top: 0; }
-.guide-content strong { color: var(--text-main); }
-.guide-content ol { padding-left: 20px; margin-bottom: 20px; }
-.guide-content li { margin-bottom: 10px; }
+.guide-wrap { max-width: 860px; margin: 0 auto; padding: 0 20px 60px; }
+.guide-motivation { background: linear-gradient(135deg, rgba(212,175,55,0.12), rgba(212,175,55,0.04)); border: 1px solid var(--gold); border-radius: 20px; padding: 40px 48px; margin-bottom: 48px; text-align: center; position: relative; overflow: hidden; }
+.guide-motivation::before { content: '✦'; position: absolute; top: -20px; left: 20px; font-size: 120px; color: rgba(212,175,55,0.05); pointer-events: none; }
+.guide-motivation::after  { content: '✦'; position: absolute; bottom: -20px; right: 20px; font-size: 120px; color: rgba(212,175,55,0.05); pointer-events: none; }
+.guide-motivation blockquote { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-style: italic; color: var(--gold); line-height: 1.5; margin-bottom: 16px; }
+.guide-motivation cite { font-size: 13px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+.guide-motivation p.sub { font-size: 15px; color: var(--text-muted); margin-top: 20px; line-height: 1.7; }
+.guide-section { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 20px; margin-bottom: 24px; overflow: hidden; }
+.guide-section-head { display: flex; align-items: center; gap: 20px; padding: 28px 32px; cursor: pointer; transition: background 0.3s; user-select: none; }
+.guide-section-head:hover { background: rgba(212,175,55,0.04); }
+.guide-section-icon { width: 52px; height: 52px; min-width: 52px; background: rgba(212,175,55,0.1); border: 1px solid var(--border); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+.guide-section-meta { flex: 1; }
+.guide-section-meta h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--gold); margin-bottom: 4px; }
+.guide-section-meta p { font-size: 13px; color: var(--text-muted); }
+.guide-section-arrow { color: var(--gold); font-size: 20px; transition: transform 0.3s; }
+.guide-section.open .guide-section-arrow { transform: rotate(180deg); }
+.guide-section-body { display: none; padding: 0 32px 32px; border-top: 1px solid var(--border); }
+.guide-section.open .guide-section-body { display: block; }
+.guide-step { display: flex; gap: 20px; margin-top: 24px; }
+.guide-step-num { width: 32px; height: 32px; min-width: 32px; background: rgba(212,175,55,0.15); border: 1px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); margin-top: 2px; }
+.guide-step-content { flex: 1; }
+.guide-step-content p { font-size: 14px; color: var(--text-muted); line-height: 1.8; margin-bottom: 6px; }
+.guide-step-content strong { color: var(--text-main); }
+.guide-step-content code { background: rgba(212,175,55,0.1); border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; font-size: 13px; color: var(--gold); font-family: monospace; }
+.guide-step-content a { color: var(--gold); text-decoration: none; border-bottom: 1px dashed var(--gold-dim); transition: 0.2s; }
+.guide-step-content a:hover { border-bottom-style: solid; }
+.guide-tip { background: rgba(212,175,55,0.06); border-left: 3px solid var(--gold); border-radius: 0 10px 10px 0; padding: 14px 18px; margin-top: 16px; font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+.guide-tip strong { color: var(--gold); }
+.guide-warn { background: rgba(255,100,50,0.06); border-left: 3px solid rgba(255,120,70,0.8); border-radius: 0 10px 10px 0; padding: 14px 18px; margin-top: 16px; font-size: 13px; color: rgba(255,180,150,0.9); line-height: 1.7; }
+.guide-warn strong { color: rgba(255,140,100,1); }
+.guide-code-block { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px 20px; margin-top: 12px; font-family: monospace; font-size: 13px; color: #a8e6cf; line-height: 1.6; overflow-x: auto; }
 
 /* RESPONSIVE */
 @media (max-width: 900px) {
@@ -516,20 +541,288 @@ body::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%;
 
 <!-- GUIDE PAGE -->
 <div class="page" id="page-guide">
-  <div class="hero" style="margin-bottom:20px;">
-    <h1>Implementation <em>Guide</em></h1>
+  <div class="hero" style="margin-bottom:40px;">
+    <h1>Setup <em>Guide</em></h1>
+    <p>Everything you need to configure Sterling AI — clearly explained, step by step.</p>
   </div>
-  <div class="guide-content">
-    <h2>1. Meta Business Setup</h2>
-    <ol>
-      <li>Go to <strong>business.facebook.com/settings</strong>.</li>
-      <li>Under Users, select <strong>System Users</strong> and create one.</li>
-      <li>Generate a token checking <strong>whatsapp_business_messaging</strong>.</li>
-    </ol>
-    <h2>2. Google Sheets Structure</h2>
-    <p>Ensure your tracking sheet has columns for: Date, Credit/Debit, Purpose, Amount, Balance.</p>
-    <h2>3. Webhook Linking</h2>
-    <p>In Meta API settings, set callback URL to your Render domain + <code>/webhook/whatsapp</code>.</p>
+
+  <div class="guide-wrap">
+
+    <!-- MOTIVATION BANNER -->
+    <div class="guide-motivation">
+      <blockquote>"The best investment you can make is in tools that work while you sleep."</blockquote>
+      <cite>— Your future self, thanking you</cite>
+      <p class="sub">Yes, this setup looks like a lot. But here's the truth: <strong style="color:var(--text-main)">you only do this once.</strong> After today, your Sterling AI agent handles emails, meetings, expenses, and web searches — all from WhatsApp. Every minute you spend here saves you hours every week. Let's build your personal AI, one step at a time. 🚀</p>
+    </div>
+
+    <!-- SECTION 1: META DEVELOPER APP -->
+    <div class="guide-section" id="gs1">
+      <div class="guide-section-head" onclick="toggleGuide('gs1')">
+        <div class="guide-section-icon">🧑‍💻</div>
+        <div class="guide-section-meta">
+          <h3>Step 1 — Create a Meta Developer App</h3>
+          <p>Set up your Meta developer account and create the WhatsApp-enabled app</p>
+        </div>
+        <div class="guide-section-arrow">▾</div>
+      </div>
+      <div class="guide-section-body">
+        <div class="guide-step">
+          <div class="guide-step-num">1</div>
+          <div class="guide-step-content">
+            <p>Go to <a href="https://developers.facebook.com" target="_blank">developers.facebook.com</a> and sign in with your personal Facebook account.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">2</div>
+          <div class="guide-step-content">
+            <p>Click <strong>My Apps → Create App</strong>. When asked for the use case, select <strong>"Business"</strong> and click Next.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">3</div>
+          <div class="guide-step-content">
+            <p>Give your app a name (e.g. <strong>Sterling AI Agent</strong>), enter your email, and optionally link a Meta Business Account. Click <strong>Create App</strong>.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">4</div>
+          <div class="guide-step-content">
+            <p>In your app dashboard, scroll down to find <strong>WhatsApp</strong> and click <strong>Set Up</strong>. This adds WhatsApp as a product to your app.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">5</div>
+          <div class="guide-step-content">
+            <p>Under <strong>WhatsApp → Getting Started</strong>, you'll see a test phone number and a <strong>Phone Number ID</strong>. Copy and save this — you'll need it in the setup form.</p>
+          </div>
+        </div>
+        <div class="guide-tip"><strong>💡 Tip:</strong> You don't need to publish your app. It works in Development mode for your own number. Just make sure your WhatsApp number is added as a test recipient.</div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: PERMANENT TOKEN -->
+    <div class="guide-section" id="gs2">
+      <div class="guide-section-head" onclick="toggleGuide('gs2')">
+        <div class="guide-section-icon">🔑</div>
+        <div class="guide-section-meta">
+          <h3>Step 2 — Get Your Permanent WhatsApp Token</h3>
+          <p>Create a System User token that never expires</p>
+        </div>
+        <div class="guide-section-arrow">▾</div>
+      </div>
+      <div class="guide-section-body">
+        <div class="guide-warn"><strong>⚠️ Important:</strong> The temporary token on the Getting Started page expires in 24 hours. You MUST follow these steps to get a permanent token that works forever.</div>
+        <div class="guide-step">
+          <div class="guide-step-num">1</div>
+          <div class="guide-step-content">
+            <p>Go to <a href="https://business.facebook.com/settings" target="_blank">business.facebook.com/settings</a> and make sure you're inside your Meta Business Suite.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">2</div>
+          <div class="guide-step-content">
+            <p>In the left menu, go to <strong>Users → System Users</strong>. Click <strong>Add</strong> to create a new System User. Name it (e.g. "Sterling AI Bot") and set role to <strong>Admin</strong>.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">3</div>
+          <div class="guide-step-content">
+            <p>After creating the System User, click <strong>Add Assets</strong>. Select <strong>Apps</strong>, choose your app (Sterling AI Agent), and grant it <strong>Full Control</strong>.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">4</div>
+          <div class="guide-step-content">
+            <p>Click <strong>Generate New Token</strong> on the System User. Select your app. Under permissions, check <strong><code>whatsapp_business_messaging</code></strong> and <strong><code>whatsapp_business_management</code></strong>. Click Generate Token.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">5</div>
+          <div class="guide-step-content">
+            <p><strong>Copy the token immediately</strong> — it is only shown once. This is your Permanent Access Token. Paste it into the setup form above.</p>
+          </div>
+        </div>
+        <div class="guide-tip"><strong>💡 Tip:</strong> This token is tied to the System User, not a personal account. It will not expire unless you manually revoke it. Keep it private — treat it like a password.</div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: WEBHOOK & VERIFY TOKEN -->
+    <div class="guide-section" id="gs3">
+      <div class="guide-section-head" onclick="toggleGuide('gs3')">
+        <div class="guide-section-icon">🔗</div>
+        <div class="guide-section-meta">
+          <h3>Step 3 — Configure Webhook &amp; Verify Token</h3>
+          <p>Connect your Sterling AI server to receive WhatsApp messages</p>
+        </div>
+        <div class="guide-section-arrow">▾</div>
+      </div>
+      <div class="guide-section-body">
+        <div class="guide-step">
+          <div class="guide-step-num">1</div>
+          <div class="guide-step-content">
+            <p>In your Meta app dashboard, go to <strong>WhatsApp → Configuration</strong>. Click <strong>Edit</strong> next to the Webhook section.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">2</div>
+          <div class="guide-step-content">
+            <p>In the <strong>Callback URL</strong> field, enter your Render server URL followed by <code>/webhook/whatsapp</code>. Example:</p>
+            <div class="guide-code-block">https://your-app-name.onrender.com/webhook/whatsapp</div>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">3</div>
+          <div class="guide-step-content">
+            <p>In the <strong>Verify Token</strong> field, type exactly: <code>my_verify_token</code></p>
+            <p style="margin-top:8px;">This exact value is already pre-filled in the setup form. It's a secret handshake between Meta and your server.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">4</div>
+          <div class="guide-step-content">
+            <p>Click <strong>Verify and Save</strong>. Meta will call your server to confirm it's running. If it fails, make sure your Render deployment is live.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">5</div>
+          <div class="guide-step-content">
+            <p>After saving, click <strong>Manage</strong> next to Webhook Fields and subscribe to <strong><code>messages</code></strong>. This makes Meta send all WhatsApp messages to your server.</p>
+          </div>
+        </div>
+        <div class="guide-warn"><strong>⚠️ Keep in mind:</strong> The verify token must match exactly — <code>my_verify_token</code> — case-sensitive, no spaces. If you change it in the form, update it in Meta too.</div>
+        <div class="guide-tip"><strong>💡 Tip:</strong> If Render is sleeping (free tier), send one request to your app URL first to wake it up, then verify the webhook in Meta.</div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: FIREFLIES API -->
+    <div class="guide-section" id="gs4">
+      <div class="guide-section-head" onclick="toggleGuide('gs4')">
+        <div class="guide-section-icon">🔥</div>
+        <div class="guide-section-meta">
+          <h3>Step 4 — Get Your Fireflies API Key</h3>
+          <p>Enable AI-powered online meeting recording and transcription</p>
+        </div>
+        <div class="guide-section-arrow">▾</div>
+      </div>
+      <div class="guide-section-body">
+        <div class="guide-step">
+          <div class="guide-step-num">1</div>
+          <div class="guide-step-content">
+            <p>Visit <a href="https://app.fireflies.ai" target="_blank">app.fireflies.ai</a> and sign up for a free account using your email.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">2</div>
+          <div class="guide-step-content">
+            <p>Once logged in, click your profile icon (top right) → <strong>Settings</strong>.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">3</div>
+          <div class="guide-step-content">
+            <p>In the left menu, scroll down to find the <strong>API Access</strong> section. Click <strong>Generate API Key</strong>.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">4</div>
+          <div class="guide-step-content">
+            <p>Copy the key and paste it into the <strong>Fireflies API Key</strong> field in the setup form.</p>
+          </div>
+        </div>
+        <div class="guide-tip"><strong>💡 What it does:</strong> When you share a Google Meet, Zoom, or Teams link in WhatsApp, Sterling AI sends a bot to join, record, and transcribe your meeting automatically. The free tier gives 800 mins/month — more than enough to start.</div>
+      </div>
+    </div>
+
+    <!-- SECTION 5: OPENAI API -->
+    <div class="guide-section" id="gs5">
+      <div class="guide-section-head" onclick="toggleGuide('gs5')">
+        <div class="guide-section-icon">🤖</div>
+        <div class="guide-section-meta">
+          <h3>Step 5 — Get Your OpenAI API Key</h3>
+          <p>Power the brain behind Sterling AI — GPT-4o + Whisper</p>
+        </div>
+        <div class="guide-section-arrow">▾</div>
+      </div>
+      <div class="guide-section-body">
+        <div class="guide-step">
+          <div class="guide-step-num">1</div>
+          <div class="guide-step-content">
+            <p>Go to <a href="https://platform.openai.com" target="_blank">platform.openai.com</a> and sign in or create a free account.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">2</div>
+          <div class="guide-step-content">
+            <p>Click your profile icon (top right) → <strong>API Keys</strong> → <strong>Create new secret key</strong>. Give it a name like "Sterling AI".</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">3</div>
+          <div class="guide-step-content">
+            <p>Copy the key (it starts with <code>sk-proj-...</code>) and paste it into the <strong>OpenAI API Key</strong> field in the setup form.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">4</div>
+          <div class="guide-step-content">
+            <p>You'll need to add a small credit (minimum $5) to your OpenAI account at <a href="https://platform.openai.com/settings/billing" target="_blank">platform.openai.com/settings/billing</a>. Sterling AI costs roughly $0.01–$0.05 per conversation — very affordable.</p>
+          </div>
+        </div>
+        <div class="guide-warn"><strong>⚠️ Keep your key private:</strong> Never share this key. If exposed, revoke it immediately from the OpenAI dashboard and generate a new one.</div>
+        <div class="guide-tip"><strong>💡 Tip:</strong> You can set usage limits in OpenAI settings so you never get charged more than you expect. Go to Settings → Limits and set a monthly cap.</div>
+      </div>
+    </div>
+
+    <!-- SECTION 6: GOOGLE SHEET -->
+    <div class="guide-section" id="gs6">
+      <div class="guide-section-head" onclick="toggleGuide('gs6')">
+        <div class="guide-section-icon">📊</div>
+        <div class="guide-section-meta">
+          <h3>Step 6 — Set Up Your Google Sheet</h3>
+          <p>Create the finance tracking ledger connected to your agent</p>
+        </div>
+        <div class="guide-section-arrow">▾</div>
+      </div>
+      <div class="guide-section-body">
+        <div class="guide-step">
+          <div class="guide-step-num">1</div>
+          <div class="guide-step-content">
+            <p>Go to <a href="https://sheets.google.com" target="_blank">sheets.google.com</a> with the same Google account you connected in Step 1 (Google Auth).</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">2</div>
+          <div class="guide-step-content">
+            <p>Create a new spreadsheet. In <strong>Row 1</strong>, add these exact column headers:</p>
+            <div class="guide-code-block">Date &nbsp;|&nbsp; Credit/Debit &nbsp;|&nbsp; Purpose &nbsp;|&nbsp; Amount &nbsp;|&nbsp; Balance</div>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">3</div>
+          <div class="guide-step-content">
+            <p>Look at the URL of your sheet. The <strong>Sheet ID</strong> is the long string between <code>/d/</code> and <code>/edit</code>:</p>
+            <div class="guide-code-block">https://docs.google.com/spreadsheets/d/<strong style="color:var(--gold)">THIS_IS_YOUR_SHEET_ID</strong>/edit</div>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">4</div>
+          <div class="guide-step-content">
+            <p>Copy that ID and paste it into the <strong>Finance Tracking Sheet ID</strong> field in the setup form.</p>
+          </div>
+        </div>
+        <div class="guide-tip"><strong>💡 Tip:</strong> You don't need to share the sheet with anyone. Sterling AI accesses it directly using your Google credentials that were authorized in Step 1.</div>
+        <div class="guide-warn"><strong>⚠️ Keep in mind:</strong> Make sure the sheet is in the same Google account you used for Google Auth. Cross-account access will not work.</div>
+      </div>
+    </div>
+
+    <!-- FINAL WORDS -->
+    <div style="background:rgba(212,175,55,0.06);border:1px solid var(--border);border-radius:16px;padding:32px 36px;margin-top:40px;text-align:center;">
+      <div style="font-size:32px;margin-bottom:16px;">🎉</div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--gold);margin-bottom:12px;">You're Almost There!</h3>
+      <p style="color:var(--text-muted);font-size:15px;line-height:1.8;max-width:560px;margin:0 auto;">Once you fill in the setup form and hit <strong style="color:var(--text-main)">Save &amp; Deploy Agent</strong>, your Sterling AI is live. From that point on, just open WhatsApp and talk to your agent — it handles the rest. No apps, no dashboards, just intelligence at your fingertips.</p>
+      <button class="btn btn-gold" style="margin-top:28px;" onclick="showPage('setup', document.querySelector('.nav-link'))">Go to Setup Form →</button>
+    </div>
+
   </div>
 </div>
 
@@ -538,6 +831,15 @@ const USD_TO_INR = 84;
 
 function toggleMenu() {
   document.getElementById('navMenu').classList.toggle('show');
+}
+
+function toggleGuide(id) {
+  const section = document.getElementById(id);
+  const isOpen = section.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.guide-section').forEach(s => s.classList.remove('open'));
+  // Open clicked (toggle)
+  if (!isOpen) section.classList.add('open');
 }
 
 function showPage(pageId, btn) {
