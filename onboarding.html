@@ -78,6 +78,24 @@
       align-items: center;
       gap: 14px;
       text-decoration: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      position: relative;
+    }
+    .nav-brand:hover { opacity: 0.85; }
+    .nav-brand::before {
+      content: '← ';
+      font-size: 13px;
+      color: var(--gold);
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      transform: translateX(4px);
+      position: absolute;
+      left: -22px;
+    }
+    .nav-brand:hover::before {
+      opacity: 1;
+      transform: translateX(0);
     }
 
     .nav-logo {
@@ -1475,7 +1493,7 @@
 <body>
 
   <nav class="nav">
-    <a class="nav-brand" href="#">
+    <a class="nav-brand" href="#" onclick="event.preventDefault(); history.back();" title="Go back">
       <div class="nav-logo">S</div>
       <span class="nav-name">Sterling AI</span>
     </a>
