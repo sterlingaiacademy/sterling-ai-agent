@@ -32,6 +32,24 @@ async def setup_page(request: Request):
         return f.read()
 
 
+# ── Google connection status ──────────────────────────────────────────────────
+@router.get("/auth/google/status")
+async def google_status(request: Request):
+    """Returns whether the current user has a valid Google token stored."""
+    client_id = request.session.get("client_id")
+    if not client_id:
+        return JSONResponse({"connected": False})
+    try:
+        from agent.database import supabase
+        result = supabase.table("clients").select("google_token_json").eq("id", client_id).execute()
+        has_token = bool(result.data and result.data[0].get("google_token_json"))
+        return JSONResponse({"connected": has_token})
+    except Exception as e:
+        return JSONResponse({"connected": False})
+
+
+
+
 # ── Usage stats API ───────────────────────────────────────────────────────────
 @router.get("/usage")
 async def usage_stats(request: Request):

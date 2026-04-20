@@ -80,23 +80,8 @@
       text-decoration: none;
       cursor: pointer;
       transition: opacity 0.2s;
-      position: relative;
     }
     .nav-brand:hover { opacity: 0.85; }
-    .nav-brand::before {
-      content: '← ';
-      font-size: 13px;
-      color: var(--gold);
-      opacity: 0;
-      transition: opacity 0.2s, transform 0.2s;
-      transform: translateX(4px);
-      position: absolute;
-      left: -22px;
-    }
-    .nav-brand:hover::before {
-      opacity: 1;
-      transform: translateX(0);
-    }
 
     .nav-logo {
       width: 40px;
@@ -1493,7 +1478,7 @@
 <body>
 
   <nav class="nav">
-    <a class="nav-brand" href="#" onclick="event.preventDefault(); history.back();" title="Go back">
+    <a class="nav-brand" href="/" title="Go to home">
       <div class="nav-logo">S</div>
       <span class="nav-name">Sterling AI</span>
     </a>
@@ -1511,188 +1496,162 @@
   <!-- SETUP PAGE -->
   <div class="page active" id="page-setup">
     <div class="hero">
-      <div class="hero-badge">
-        <div class="dot"></div><span>Secure Initialization</span>
-      </div>
-      <h1>Deploy your<br /><em>Sterling AI</em><br />Agent</h1>
-      <p>Configure your Google Workspace and WhatsApp Business API credentials to activate your luxurious, autonomous
-        assistant.</p>
+      <div class="hero-badge"><div class="dot"></div><span>Secure Initialization</span></div>
+      <h1>Deploy your<br/><em>Sterling AI</em><br/>Agent</h1>
+      <p>Complete each step to activate your luxurious, autonomous assistant.</p>
     </div>
 
     <div class="prog-container">
-      <div class="prog-inner">
-        <div class="prog-step active" id="ps1" onclick="goToStep(1)">
+      <div class="prog-inner" style="padding:16px 24px;">
+        <div class="prog-step active" id="ps1">
           <div class="prog-num">1</div>
-          <div class="prog-text"><span class="prog-label">Google Auth</span><span class="prog-sub">Workspace
-              Access</span></div>
+          <div class="prog-text"><span class="prog-label">Google & AI</span><span class="prog-sub">Auth + OpenAI</span></div>
         </div>
         <div class="prog-line"></div>
-        <div class="prog-step" id="ps2" onclick="goToStep(2)">
+        <div class="prog-step" id="ps2">
           <div class="prog-num">2</div>
-          <div class="prog-text"><span class="prog-label">WhatsApp API</span><span class="prog-sub">Meta
-              Integration</span></div>
+          <div class="prog-text"><span class="prog-label">WhatsApp</span><span class="prog-sub">Meta API</span></div>
         </div>
         <div class="prog-line"></div>
-        <div class="prog-step" id="ps3" onclick="goToStep(3)">
+        <div class="prog-step" id="ps3">
           <div class="prog-num">3</div>
-          <div class="prog-text"><span class="prog-label">Activation</span><span class="prog-sub">System Live</span>
-          </div>
+          <div class="prog-text"><span class="prog-label">Meetings</span><span class="prog-sub">Fireflies AI</span></div>
+        </div>
+        <div class="prog-line"></div>
+        <div class="prog-step" id="ps4">
+          <div class="prog-num">4</div>
+          <div class="prog-text"><span class="prog-label">Finance</span><span class="prog-sub">Sheets + Email</span></div>
+        </div>
+        <div class="prog-line"></div>
+        <div class="prog-step" id="ps5">
+          <div class="prog-num">5</div>
+          <div class="prog-text"><span class="prog-label">Activate</span><span class="prog-sub">Go Live</span></div>
         </div>
       </div>
     </div>
 
     <div class="setup-wrap">
 
-      <!-- Step 1: Google -->
+      <!-- Step 1: Google Auth + OpenAI -->
       <div class="setup-panel active" id="sp1">
         <div class="sp-header">
-          <h2>Google Workspace</h2>
-          <p>Grant Sterling AI secure access to your Gmail, Calendar, and Sheets infrastructure.</p>
+          <h2>Google Workspace &amp; AI Brain</h2>
+          <p>Connect your Google account and provide your OpenAI key to power the agent.</p>
         </div>
 
         <div class="g-card">
           <div class="g-header">
             <div class="g-info">
               <div class="g-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24">
-                  <path
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    fill="#4285F4" />
-                  <path
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    fill="#34A853" />
-                  <path
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    fill="#FBBC05" />
-                  <path
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    fill="#EA4335" />
-                </svg>
+                <svg width="24" height="24" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
               </div>
-              <div class="g-text">
-                <h3>Google Account Integration</h3>
-                <p>Required for email, calendar events, and finance tracking.</p>
-              </div>
+              <div class="g-text"><h3>Google Account</h3><p>Gmail · Calendar · Sheets access</p></div>
             </div>
             <div class="g-status" id="gstatus">Pending Connection</div>
           </div>
-          <button class="btn btn-glass" onclick="connectGoogle()">Authenticate with Google</button>
+          <button class="btn btn-glass" id="google-btn" onclick="connectGoogle()">Authenticate with Google</button>
         </div>
+
+        <div class="form-group" style="margin-top:30px;">
+          <div class="form-label"><span>OpenAI API Key</span><span class="form-badge">Required</span></div>
+          <input type="password" id="openai_api_key" class="form-input" placeholder="sk-proj-..."/>
+          <div class="form-hint"><i>🤖</i><span>From <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a> — powers GPT-4o &amp; Whisper.</span></div>
+        </div>
+
+        <div class="alert alert-error" id="s1-err"></div>
 
         <div class="action-bar">
           <div></div>
-          <button class="btn btn-gold" onclick="goToStep(2)">Proceed to Configuration &rarr;</button>
+          <button class="btn btn-gold" onclick="validateStep1()">Verify &amp; Continue &rarr;</button>
         </div>
       </div>
 
-      <!-- Step 2: WhatsApp & Sheets -->
+      <!-- Step 2: WhatsApp -->
       <div class="setup-panel" id="sp2">
         <div class="sp-header">
-          <h2>System Configuration</h2>
-          <p>Provide your Meta API keys and designated Google Sheet identifier.</p>
+          <h2>WhatsApp Business API</h2>
+          <p>Connect your Meta developer app to receive and send messages.</p>
         </div>
-
-        <div class="alert alert-error" id="wa-err"></div>
-        <div class="alert alert-success" id="wa-ok"></div>
+        <div class="alert alert-error" id="s2-err"></div>
 
         <div class="form-group">
           <div class="form-label"><span>Permanent Access Token</span><span class="form-badge">Required</span></div>
-          <input type="password" id="wa_token" class="form-input" placeholder="EAAxxxxxxxxx..." />
-          <div class="form-hint"><i>🔑</i><span>Generated via Meta Business Settings
-              (whatsapp_business_messaging).</span></div>
+          <input type="password" id="wa_token" class="form-input" placeholder="EAAxxxxxxxxx..."/>
+          <div class="form-hint"><i>🔑</i><span>From Meta Business Suite → System Users (never expires).</span></div>
         </div>
-
         <div class="form-group">
           <div class="form-label"><span>Phone Number ID</span><span class="form-badge">Required</span></div>
-          <input type="text" id="wa_phone_id" class="form-input" placeholder="e.g. 1066407156552903" />
+          <input type="text" id="wa_phone_id" class="form-input" placeholder="e.g. 1066407156552903"/>
         </div>
-
         <div class="form-group">
-          <div class="form-label"><span>Webhook Verify Token</span><span class="form-badge"
-              style="color:var(--text-muted);border-color:transparent;">Custom</span></div>
-          <input type="text" id="wa_verify_token" class="form-input" value="my_verify_token" />
+          <div class="form-label"><span>Webhook Verify Token</span><span class="form-badge" style="color:var(--text-muted);border-color:transparent;">Custom</span></div>
+          <input type="text" id="wa_verify_token" class="form-input" value="my_verify_token"/>
         </div>
-
         <div class="form-group">
           <div class="form-label"><span>Your WhatsApp Number</span><span class="form-badge">Required</span></div>
-          <input type="text" id="wa_phone" class="form-input" placeholder="919876543210" />
-          <div class="form-hint"><i>📱</i><span>Include country code without the '+' symbol.</span></div>
-        </div>
-
-        <div class="form-group" style="margin-top:40px;">
-          <div class="form-label"><span>Finance Tracking Sheet ID</span><span class="form-badge">Required</span></div>
-          <input type="text" id="sheet_id" class="form-input" placeholder="Google Sheet ID from URL" />
-        </div>
-
-        <div class="form-group">
-          <div class="form-label"><span>System Alert Email</span><span class="form-badge">Required</span></div>
-          <input type="email" id="alert_email" class="form-input" placeholder="admin@example.com" />
-        </div>
-
-        <div class="form-group" style="margin-top:40px;">
-          <div class="form-label"><span>OpenAI API Key</span><span class="form-badge">Required</span></div>
-          <input type="password" id="openai_api_key" class="form-input" placeholder="sk-proj-..." />
-          <div class="form-hint"><i>🤖</i><span>Your personal key from <a href="https://platform.openai.com/api-keys"
-                target="_blank">platform.openai.com/api-keys</a>. Usage billed to your account.</span></div>
-        </div>
-
-        <div class="form-group">
-          <div class="form-label"><span>Fireflies API Key</span><span class="form-badge">Required</span></div>
-          <input type="password" id="fireflies_api_key" class="form-input" placeholder="your-fireflies-key..." />
-          <div class="form-hint"><i>🔥</i><span>Get from <a href="https://app.fireflies.ai/account"
-                target="_blank">app.fireflies.ai/account</a> → API section.</span></div>
-        </div>
-
-        <button class="btn btn-outline" style="width:100%;margin-top:20px;" onclick="verifyCredentials()">Initialize
-          Diagnostics</button>
-
-        <div class="verify-box" id="vbox">
-          <div class="v-row">
-            <div class="v-icon loading" id="vi-wa"></div>
-            <div>
-              <div class="v-text">Meta API Handshake</div>
-              <div class="v-sub" id="vm-wa">Awaiting execution...</div>
-            </div>
-          </div>
-          <div class="v-row">
-            <div class="v-icon loading" id="vi-sh"></div>
-            <div>
-              <div class="v-text">Sheet Permissions</div>
-              <div class="v-sub" id="vm-sh">Awaiting execution...</div>
-            </div>
-          </div>
-          <div class="v-row">
-            <div class="v-icon loading" id="vi-oai"></div>
-            <div>
-              <div class="v-text">OpenAI Key</div>
-              <div class="v-sub" id="vm-oai">Awaiting execution...</div>
-            </div>
-          </div>
-          <div class="v-row">
-            <div class="v-icon loading" id="vi-ff"></div>
-            <div>
-              <div class="v-text">Fireflies Key</div>
-              <div class="v-sub" id="vm-ff">Awaiting execution...</div>
-            </div>
-          </div>
+          <input type="text" id="wa_phone" class="form-input" placeholder="919876543210"/>
+          <div class="form-hint"><i>📱</i><span>Include country code without '+' (e.g. 919876543210).</span></div>
         </div>
 
         <div class="action-bar">
-          <button class="btn btn-glass" onclick="goToStep(1)">&larr; Return</button>
-          <button class="btn btn-gold" onclick="saveConfig()">Save & Deploy Agent &rarr;</button>
+          <button class="btn btn-glass" onclick="goToStep(1)">&larr; Back</button>
+          <button class="btn btn-gold" onclick="validateStep2()">Verify &amp; Continue &rarr;</button>
         </div>
       </div>
 
-      <!-- Step 3: Success -->
-      <div class="setup-panel" id="sp3" style="text-align:center;">
-        <div
-          style="width:80px;height:80px;background:var(--success-bg);border:2px solid #4caf50;color:#4caf50;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 30px;">
-          ✓</div>
-        <h2 style="font-family:'Cormorant Garamond',serif;font-size:40px;color:var(--gold);margin-bottom:20px;">Agent
-          Operational</h2>
-        <p style="color:var(--text-muted);line-height:1.8;margin-bottom:40px;">Sterling AI is now monitoring your
-          WhatsApp endpoint. Systems are fully integrated.</p>
+      <!-- Step 3: Meetings / Fireflies -->
+      <div class="setup-panel" id="sp3">
+        <div class="sp-header">
+          <h2>Meeting Intelligence</h2>
+          <p>Connect Fireflies.ai so your agent can join and transcribe online meetings automatically.</p>
+        </div>
+        <div class="alert alert-error" id="s3-err"></div>
+
+        <div class="form-group">
+          <div class="form-label"><span>Fireflies API Key</span><span class="form-badge">Required</span></div>
+          <input type="password" id="fireflies_api_key" class="form-input" placeholder="your-fireflies-key..."/>
+          <div class="form-hint"><i>🔥</i><span>Get from <a href="https://app.fireflies.ai/account" target="_blank">app.fireflies.ai</a> → Settings → API Access.</span></div>
+        </div>
+
+        <div class="action-bar">
+          <button class="btn btn-glass" onclick="goToStep(2)">&larr; Back</button>
+          <button class="btn btn-gold" onclick="validateStep3()">Verify &amp; Continue &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Finance / Sheets -->
+      <div class="setup-panel" id="sp4">
+        <div class="sp-header">
+          <h2>Finance Configuration</h2>
+          <p>Link your Google Sheet ledger and set an alert email for system notifications.</p>
+        </div>
+        <div class="alert alert-error" id="s4-err"></div>
+
+        <div class="form-group">
+          <div class="form-label"><span>Finance Tracking Sheet ID</span><span class="form-badge">Required</span></div>
+          <input type="text" id="sheet_id" class="form-input" placeholder="Google Sheet ID from URL"/>
+          <div class="form-hint"><i>📊</i><span>The long ID between <code style="background:rgba(212,175,55,0.1);padding:1px 6px;border-radius:4px;">/d/</code> and <code style="background:rgba(212,175,55,0.1);padding:1px 6px;border-radius:4px;">/edit</code> in your Sheet URL.</span></div>
+        </div>
+        <div class="form-group">
+          <div class="form-label"><span>System Alert Email</span><span class="form-badge">Required</span></div>
+          <input type="email" id="alert_email" class="form-input" placeholder="admin@example.com"/>
+          <div class="form-hint"><i>📧</i><span>Where system notifications and error alerts will be sent.</span></div>
+        </div>
+
+        <div class="action-bar">
+          <button class="btn btn-glass" onclick="goToStep(3)">&larr; Back</button>
+          <button class="btn btn-gold" onclick="validateStep4()">Save &amp; Activate Agent &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Step 5: Success -->
+      <div class="setup-panel" id="sp5" style="text-align:center;">
+        <div style="width:80px;height:80px;background:var(--success-bg);border:2px solid #4caf50;color:#4caf50;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 30px;">✓</div>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:40px;color:var(--gold);margin-bottom:20px;">Agent Operational</h2>
+        <p style="color:var(--text-muted);line-height:1.8;margin-bottom:40px;">Sterling AI is now monitoring your WhatsApp endpoint. All systems are fully integrated and ready.</p>
         <button class="btn btn-gold" onclick="window.location.href='/auth/status'">View Dashboard Telemetry</button>
+ 
+ Telemetry</button>
       </div>
 
     </div>
@@ -2328,79 +2287,176 @@
 
     function goToStep(step) {
       document.querySelectorAll('.setup-panel').forEach(p => p.classList.remove('active'));
-      document.getElementById('sp' + step).classList.add('active');
+      const panel = document.getElementById('sp' + step);
+      if (panel) panel.classList.add('active');
       document.querySelectorAll('.prog-step').forEach((p, idx) => {
         p.classList.remove('active', 'done');
-        if (idx + 1 < step) p.classList.add('done');
+        if (idx + 1 < step)      p.classList.add('done');
         else if (idx + 1 === step) p.classList.add('active');
       });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function connectGoogle() { window.location.href = "/auth/google"; }
+    function connectGoogle() { window.location.href = '/auth/google'; }
 
-    function showMsg(type, msg) {
-      const errBox = document.getElementById('wa-err');
-      const okBox = document.getElementById('wa-ok');
-      errBox.classList.remove('active'); okBox.classList.remove('active');
-      if (type === 'err') { errBox.textContent = msg; errBox.classList.add('active'); }
-      else if (type === 'ok') { okBox.textContent = msg; okBox.classList.add('active'); }
+    function stepErr(id, msg) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = '⚠ ' + msg;
+      el.classList.add('active');
+    }
+    function stepErrClear(id) {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = ''; el.classList.remove('active'); }
     }
 
-    function setVerify(id, status, msg) {
-      const icon = document.getElementById('vi-' + id);
-      const text = document.getElementById('vm-' + id);
-      if (!icon || !text) return;
-      if (status === 'ok') { icon.className = 'v-icon ok'; icon.textContent = '✓'; }
-      if (status === 'err') { icon.className = 'v-icon err'; icon.textContent = '!'; }
-      text.textContent = msg;
-    }
-
-    async function verifyCredentials() {
-      const data = {
-        wa_token: document.getElementById('wa_token').value,
-        wa_phone_id: document.getElementById('wa_phone_id').value,
-        wa_verify_token: document.getElementById('wa_verify_token').value,
-        wa_phone: document.getElementById('wa_phone').value,
-        sheet_id: document.getElementById('sheet_id').value,
-        alert_email: document.getElementById('alert_email').value,
-        openai_api_key: document.getElementById('openai_api_key').value,
-        fireflies_api_key: document.getElementById('fireflies_api_key').value
-      };
-      if (!data.wa_token || !data.wa_phone_id || !data.sheet_id) {
-        showMsg('err', 'Please fill all required fields before verifying.'); return;
-      }
-      document.getElementById('vbox').classList.add('active');
-      ['wa', 'sh', 'oai', 'ff'].forEach(k => {
-        document.getElementById('vi-' + k).className = 'v-icon loading';
-        document.getElementById('vm-' + k).textContent = 'Checking...';
-      });
+    async function checkGoogleStatus() {
       try {
-        const res = await fetch('/setup/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        const res = await fetch('/auth/google/status');
+        const d = await res.json();
+        if (d.connected) {
+          document.getElementById('gstatus').textContent = 'Connected ✓';
+          document.getElementById('gstatus').className = 'g-status connected';
+          const btn = document.getElementById('google-btn');
+          if (btn) { btn.textContent = 'Re-authenticate'; btn.style.opacity = '0.6'; }
+        }
+      } catch(e) {}
+    }
+
+    async function validateStep1() {
+      stepErrClear('s1-err');
+      const gEl    = document.getElementById('gstatus');
+      const oaiKey = document.getElementById('openai_api_key').value.trim();
+      const gConnected = gEl && gEl.classList.contains('connected');
+
+      if (!gConnected) { stepErr('s1-err', 'Please authenticate with Google first.'); return; }
+      if (!oaiKey)      { stepErr('s1-err', 'OpenAI API key is required.'); return; }
+
+      const btn = event.currentTarget;
+      btn.disabled = true; btn.textContent = 'Verifying…';
+      try {
+        const res = await fetch('/setup/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wa_token:'_skip', wa_phone_id:'_skip', wa_verify_token:'_skip',
+                                 wa_phone:'_skip', sheet_id:'_skip', alert_email:'_skip',
+                                 openai_api_key: oaiKey, fireflies_api_key:'' })
+        });
         const r = await res.json();
-        setVerify('wa', r.results?.whatsapp?.ok ? 'ok' : 'err', r.results?.whatsapp?.msg || 'N/A');
-        setVerify('sh', r.results?.sheets?.ok ? 'ok' : 'err', r.results?.sheets?.msg || 'N/A');
-        setVerify('oai', r.results?.openai?.ok ? 'ok' : 'err', r.results?.openai?.msg || (data.openai_api_key ? 'Failed' : 'Not provided'));
-        setVerify('ff', r.results?.fireflies?.ok ? 'ok' : 'err', r.results?.fireflies?.msg || (data.fireflies_api_key ? 'Failed' : 'Not provided'));
-      } catch (err) { showMsg('err', 'Network error during verification.'); }
+        if (r.results?.openai?.ok) {
+          goToStep(2);
+        } else {
+          stepErr('s1-err', r.results?.openai?.msg || 'OpenAI key verification failed.');
+        }
+      } catch(e) { stepErr('s1-err', 'Network error. Please try again.'); }
+      finally { btn.disabled = false; btn.textContent = 'Verify & Continue →'; }
     }
 
-    async function saveConfig() {
-      const data = {
-        wa_token: document.getElementById('wa_token').value,
-        wa_phone_id: document.getElementById('wa_phone_id').value,
-        wa_verify_token: document.getElementById('wa_verify_token').value,
-        wa_phone: document.getElementById('wa_phone').value,
-        sheet_id: document.getElementById('sheet_id').value,
-        alert_email: document.getElementById('alert_email').value,
-        openai_api_key: document.getElementById('openai_api_key').value,
-        fireflies_api_key: document.getElementById('fireflies_api_key').value
-      };
+    async function validateStep2() {
+      stepErrClear('s2-err');
+      const token   = document.getElementById('wa_token').value.trim();
+      const phoneId = document.getElementById('wa_phone_id').value.trim();
+      const vtok    = document.getElementById('wa_verify_token').value.trim();
+      const phone   = document.getElementById('wa_phone').value.trim();
+
+      if (!token || !phoneId || !phone) { stepErr('s2-err', 'All WhatsApp fields are required.'); return; }
+
+      const btn = event.currentTarget;
+      btn.disabled = true; btn.textContent = 'Verifying…';
       try {
-        const res = await fetch('/setup/whatsapp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-        if (res.ok) { goToStep(3); }
-        else { const err = await res.json(); showMsg('err', err.detail || 'Failed to save configuration.'); }
-      } catch (err) { showMsg('err', 'Network error while saving.'); }
+        const res = await fetch('/setup/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wa_token: token, wa_phone_id: phoneId,
+                                 wa_verify_token: vtok, wa_phone: phone,
+                                 sheet_id:'_skip', alert_email:'_skip',
+                                 openai_api_key:'', fireflies_api_key:'' })
+        });
+        const r = await res.json();
+        if (r.results?.whatsapp?.ok) {
+          goToStep(3);
+        } else {
+          stepErr('s2-err', r.results?.whatsapp?.msg || 'WhatsApp verification failed. Check your token and Phone ID.');
+        }
+      } catch(e) { stepErr('s2-err', 'Network error. Please try again.'); }
+      finally { btn.disabled = false; btn.textContent = 'Verify & Continue →'; }
     }
+
+    async function validateStep3() {
+      stepErrClear('s3-err');
+      const ffKey = document.getElementById('fireflies_api_key').value.trim();
+      if (!ffKey) { stepErr('s3-err', 'Fireflies API key is required.'); return; }
+
+      const btn = event.currentTarget;
+      btn.disabled = true; btn.textContent = 'Verifying…';
+      try {
+        const res = await fetch('/setup/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wa_token:'_skip', wa_phone_id:'_skip', wa_verify_token:'_skip',
+                                 wa_phone:'_skip', sheet_id:'_skip', alert_email:'_skip',
+                                 openai_api_key:'', fireflies_api_key: ffKey })
+        });
+        const r = await res.json();
+        if (r.results?.fireflies?.ok) {
+          goToStep(4);
+        } else {
+          stepErr('s3-err', r.results?.fireflies?.msg || 'Fireflies key verification failed. Check your key at app.fireflies.ai/account.');
+        }
+      } catch(e) { stepErr('s3-err', 'Network error. Please try again.'); }
+      finally { btn.disabled = false; btn.textContent = 'Verify & Continue →'; }
+    }
+
+    async function validateStep4() {
+      stepErrClear('s4-err');
+      const sheetId = document.getElementById('sheet_id').value.trim();
+      const email   = document.getElementById('alert_email').value.trim();
+      if (!sheetId) { stepErr('s4-err', 'Google Sheet ID is required.'); return; }
+      if (!email)   { stepErr('s4-err', 'Alert email is required.'); return; }
+
+      const btn = event.currentTarget;
+      btn.disabled = true; btn.textContent = 'Saving…';
+      try {
+        // Verify sheet access first
+        const vRes = await fetch('/setup/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wa_token:'_skip', wa_phone_id:'_skip', wa_verify_token:'_skip',
+                                 wa_phone:'_skip', sheet_id: sheetId, alert_email: email,
+                                 openai_api_key:'', fireflies_api_key:'' })
+        });
+        const vr = await vRes.json();
+        if (!vr.results?.sheets?.ok) {
+          stepErr('s4-err', vr.results?.sheets?.msg || 'Could not access Google Sheet. Make sure it is shared with the service account.');
+          return;
+        }
+        // All verified — save everything
+        const saveData = {
+          wa_token:          document.getElementById('wa_token').value.trim(),
+          wa_phone_id:       document.getElementById('wa_phone_id').value.trim(),
+          wa_verify_token:   document.getElementById('wa_verify_token').value.trim(),
+          wa_phone:          document.getElementById('wa_phone').value.trim(),
+          openai_api_key:    document.getElementById('openai_api_key').value.trim(),
+          fireflies_api_key: document.getElementById('fireflies_api_key').value.trim(),
+          sheet_id:          sheetId,
+          alert_email:       email
+        };
+        const sRes = await fetch('/setup/whatsapp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(saveData)
+        });
+        if (sRes.ok) {
+          goToStep(5);
+        } else {
+          const err = await sRes.json();
+          stepErr('s4-err', err.detail || 'Failed to save configuration.');
+        }
+      } catch(e) { stepErr('s4-err', 'Network error while saving.'); }
+      finally { btn.disabled = false; btn.textContent = 'Save & Activate Agent →'; }
+    }
+
+
 
     // ── Usage detail panel ────────────────────────────────────────────────────
     let _currentDetailType = null;
@@ -2583,11 +2639,19 @@
       }
     }
 
-    window.onload = function () {
+    window.onload = async function () {
+      // Check Google connection from backend (works after refresh too)
+      await checkGoogleStatus();
+
+      // Also handle immediate post-OAuth redirect
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('google') === 'ok') {
-        document.getElementById('gstatus').textContent = 'Connected';
+        document.getElementById('gstatus').textContent = 'Connected ✓';
         document.getElementById('gstatus').className = 'g-status connected';
+        const btn = document.getElementById('google-btn');
+        if (btn) { btn.textContent = 'Re-authenticate'; btn.style.opacity = '0.6'; }
+        // Clean up URL
+        window.history.replaceState({}, '', window.location.pathname);
       }
     };
   </script>
