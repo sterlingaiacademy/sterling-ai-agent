@@ -120,7 +120,7 @@ TOOLS = [
     "type": "function",
     "function": {
         "name": "invite_bot_to_meeting",
-        "description": "[ONLINE MEETINGS ONLY] Send your AI assistant to join and record a LIVE meeting when the user shares a URL (Google Meet, Zoom, Teams, Webex). Use this ONLY when the user pastes a meeting link. Do NOT use this for voice notes. Do NOT call save_meeting_recording after this.",
+        "description": "CALL THIS IMMEDIATELY when the user sends any meeting URL (Google Meet, Zoom, Teams, Webex). Do NOT just reply saying 'your assistant will join' — you MUST call this function to actually send the bot. If the message has both a URL and a name (e.g. 'meet.google.com/xxx naming standup'), call this right away. Always prepend https:// if the URL is missing it.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -227,15 +227,18 @@ MEMORY
 MEETINGS — TWO COMPLETELY SEPARATE TYPES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🔵 ONLINE MEETINGS (user shares a URL link)
-  Trigger : User sends a meeting URL (meet.google.com, zoom.us, teams.microsoft.com, webex, etc.)
-  Step 1  : Detect the URL in the message
-  Step 2  : Ask "What name should I give this meeting?" (if name not already provided)
-  Step 3  : Call invite_bot_to_meeting(meeting_url, meeting_name)
-  Step 4  : Reply "Your assistant will join and record the meeting"
+ONLINE MEETINGS (user shares a URL link)
+  Trigger : Any message containing a meeting URL (meet.google.com, zoom.us, teams.microsoft.com, webex, etc.)
+  CRITICAL RULES:
+  1. If the user's message contains BOTH a meeting URL AND a meeting name/title → call invite_bot_to_meeting IMMEDIATELY. Do NOT reply with text first.
+  2. If the user gives a URL but no name → ask ONCE for the meeting name, then call the tool.
+  3. NEVER just say "your assistant will join" without actually calling invite_bot_to_meeting.
+  4. Always normalize the URL: if it starts with meet.google.com (no https://), prepend https://
+  5. Extract the meeting name from the user's message — words like "naming X", "called X", "titled X", or the last words in the message are usually the name.
+  Example: "meet.google.com/abc-def naming standup" → call invite_bot_to_meeting(meeting_url="https://meet.google.com/abc-def", meeting_name="Standup")
   Tools   : invite_bot_to_meeting | get_meeting_transcripts | get_transcript_detail
-  ❌ NEVER ask the user to send a voice note for online meetings
-  ❌ NEVER call save_meeting_recording for a URL
+  NEVER ask the user to send a voice note for online meetings
+  NEVER call save_meeting_recording for a URL
 
 🟢 OFFLINE MEETINGS (user sends a voice note)
   Trigger : System message says "[Voice note received. Media ID saved.]"
