@@ -1468,6 +1468,13 @@
       box-shadow: var(--shadow-gold);
     }
 
+    /* View-only cards — no hover interaction */
+    .usage-card[style*="cursor:default"]:hover {
+      transform: none;
+      border-color: var(--border);
+      box-shadow: none;
+    }
+
     .usage-card.selected {
       border-color: var(--gold);
       box-shadow: 0 0 24px var(--gold-glow);
@@ -2309,7 +2316,7 @@
     <div style="max-width:1200px;margin:0 auto;padding:0 20px;">
 
       <div class="usage-grid" id="usage-cards">
-        <div class="usage-card" id="card-tokens" onclick="openUsageDetail('tokens')">
+        <div class="usage-card" id="card-tokens" style="cursor:default;">
           <div class="uc-label">OpenAI Tokens Used</div>
           <div class="uc-value" id="u-tokens">—</div>
           <div class="uc-sub">GPT-4o total tokens consumed</div>
@@ -2318,20 +2325,17 @@
               <div class="usage-bar-fill" id="u-tokens-bar" style="width:0%"></div>
             </div>
           </div>
-          <div class="uc-hint">↓ Click to see breakdown by event</div>
         </div>
-        <div class="usage-card" id="card-cost" onclick="openUsageDetail('cost')">
+        <div class="usage-card" id="card-cost" style="cursor:default;">
           <div class="uc-label">OpenAI Cost</div>
           <div class="uc-value" id="u-cost">—</div>
           <div class="uc-sub usd-inr" id="u-cost-inr">Calculating...</div>
           <div class="uc-sub" style="margin-top:8px;">GPT-4o: $0.005/1K input · $0.015/1K output</div>
-          <div class="uc-hint">↓ Click to see cost per action</div>
         </div>
-        <div class="usage-card" id="card-online" onclick="openUsageDetail('online')">
+        <div class="usage-card" id="card-online" style="cursor:default;">
           <div class="uc-label">Online Meeting Minutes</div>
           <div class="uc-value" id="u-online-mins">—</div>
           <div class="uc-sub" id="u-online-count">Live meetings via link</div>
-          <div class="uc-hint">↓ Click to see all meetings</div>
         </div>
         <div class="usage-card" id="card-offline" onclick="openUsageDetail('offline')">
           <div class="uc-label">Offline Meeting Minutes</div>
