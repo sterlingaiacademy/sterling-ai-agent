@@ -197,7 +197,7 @@
       background: rgba(14, 14, 18, 0.96);
       border: 1px solid var(--border);
       border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,175,55,0.05);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(212, 175, 55, 0.05);
       backdrop-filter: blur(20px);
       overflow: hidden;
       z-index: 999;
@@ -205,8 +205,15 @@
     }
 
     @keyframes dropIn {
-      from { opacity: 0; transform: translateY(-8px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .nav-dropdown.open {
@@ -248,7 +255,7 @@
     }
 
     .dd-item:hover {
-      background: rgba(255,255,255,0.05);
+      background: rgba(255, 255, 255, 0.05);
     }
 
     .dd-item .dd-icon {
@@ -262,16 +269,26 @@
       flex-shrink: 0;
     }
 
-    .dd-item.danger { color: #ff6b6b; }
-    .dd-item.danger:hover { background: rgba(255,77,77,0.08); }
-    .dd-divider { height: 1px; background: var(--border); margin: 4px 0; }
+    .dd-item.danger {
+      color: #ff6b6b;
+    }
+
+    .dd-item.danger:hover {
+      background: rgba(255, 77, 77, 0.08);
+    }
+
+    .dd-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
 
     /* ACCOUNT SETTINGS MODAL */
     .acct-modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.75);
+      background: rgba(0, 0, 0, 0.75);
       z-index: 9999;
       align-items: center;
       justify-content: center;
@@ -289,7 +306,7 @@
       padding: 0;
       max-width: 480px;
       width: 94%;
-      box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,175,55,0.08);
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(212, 175, 55, 0.08);
       overflow: hidden;
       animation: fadeIn 0.25s ease;
     }
@@ -297,7 +314,7 @@
     .acct-modal-header {
       padding: 28px 32px 22px;
       border-bottom: 1px solid var(--border);
-      background: linear-gradient(135deg, rgba(212,175,55,0.06), transparent);
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.06), transparent);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -320,7 +337,10 @@
       transition: all 0.2s;
     }
 
-    .acct-modal-close:hover { background: rgba(255,255,255,0.07); color: #fff; }
+    .acct-modal-close:hover {
+      background: rgba(255, 255, 255, 0.07);
+      color: #fff;
+    }
 
     .acct-modal-body {
       padding: 28px 32px 32px;
@@ -335,15 +355,17 @@
       margin: 20px 0 12px;
     }
 
-    .acct-section-title:first-child { margin-top: 0; }
+    .acct-section-title:first-child {
+      margin-top: 0;
+    }
 
     .acct-info-row {
       display: flex;
       align-items: center;
       gap: 10px;
       padding: 13px 16px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
       border-radius: 10px;
       margin-bottom: 10px;
     }
@@ -369,7 +391,7 @@
     .acct-input {
       flex: 1;
       padding: 12px 14px;
-      background: rgba(0,0,0,0.25);
+      background: rgba(0, 0, 0, 0.25);
       border: 1px solid var(--border);
       border-radius: 10px;
       color: var(--text-main);
@@ -381,8 +403,8 @@
 
     .acct-input:focus {
       border-color: var(--gold);
-      box-shadow: 0 0 0 2px rgba(212,175,55,0.15);
-      background: rgba(0,0,0,0.4);
+      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.15);
+      background: rgba(0, 0, 0, 0.4);
     }
 
     .acct-btn {
@@ -407,14 +429,16 @@
     }
 
     .acct-btn-danger {
-      background: rgba(255,77,77,0.1);
+      background: rgba(255, 77, 77, 0.1);
       color: #ff6b6b;
-      border: 1px solid rgba(255,77,77,0.25);
+      border: 1px solid rgba(255, 77, 77, 0.25);
       width: 100%;
       margin-top: 6px;
     }
 
-    .acct-btn-danger:hover { background: rgba(255,77,77,0.18); }
+    .acct-btn-danger:hover {
+      background: rgba(255, 77, 77, 0.18);
+    }
 
     .acct-msg {
       font-size: 13px;
@@ -424,8 +448,17 @@
       display: none;
     }
 
-    .acct-msg.success { background: var(--success-bg); color: #4caf50; border: 1px solid rgba(76,175,80,0.25); }
-    .acct-msg.error   { background: var(--error-bg);   color: #ff6b6b; border: 1px solid rgba(255,77,77,0.25); }
+    .acct-msg.success {
+      background: var(--success-bg);
+      color: #4caf50;
+      border: 1px solid rgba(76, 175, 80, 0.25);
+    }
+
+    .acct-msg.error {
+      background: var(--error-bg);
+      color: #ff6b6b;
+      border: 1px solid rgba(255, 77, 77, 0.25);
+    }
 
     /* MOBILE MENU TOGGLE */
     .menu-toggle {
@@ -1904,14 +1937,16 @@
           <span class="acct-info-val" id="acctEmailDisplay">—</span>
         </div>
         <div class="acct-input-group">
-          <input class="acct-input" id="acctDisplayName" type="text" placeholder="Your display name (e.g. Rasha)" maxlength="80" />
+          <input class="acct-input" id="acctDisplayName" type="text" placeholder="Your display name (e.g. Rasha)"
+            maxlength="80" />
           <button class="acct-btn acct-btn-gold" onclick="saveDisplayName()">Save</button>
         </div>
         <div class="acct-msg" id="nameMsg"></div>
 
         <!-- Change Password -->
         <div class="acct-section-title">Change Password</div>
-        <input class="acct-input" id="acctCurrPw" type="password" placeholder="Current password" style="margin-bottom:10px;" />
+        <input class="acct-input" id="acctCurrPw" type="password" placeholder="Current password"
+          style="margin-bottom:10px;" />
         <div class="acct-input-group">
           <input class="acct-input" id="acctNewPw" type="password" placeholder="New password (min 8 chars)" />
           <button class="acct-btn acct-btn-gold" onclick="savePassword()">Update</button>
@@ -1920,7 +1955,8 @@
 
         <!-- Danger Zone -->
         <div class="acct-section-title" style="color:rgba(255,100,100,0.6);margin-top:28px;">Danger Zone</div>
-        <button class="acct-btn acct-btn-danger" onclick="closeAccountModal(); openDeleteModal();">🗑️ Permanently Delete Account</button>
+        <button class="acct-btn acct-btn-danger" onclick="closeAccountModal(); openDeleteModal();">🗑️ Permanently
+          Delete Account</button>
       </div>
     </div>
   </div>
@@ -1931,7 +1967,8 @@
     <div
       style="background:#0f0f12;border:1px solid rgba(255,77,77,0.35);border-radius:24px;padding:40px;max-width:420px;width:90%;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,0.7);">
       <div style="font-size:42px;margin-bottom:16px;">⚠️</div>
-      <h2 style="font-family:'Cormorant Garamond',serif;color:#ff4d4d;margin-bottom:12px;font-size:28px;">Delete Account</h2>
+      <h2 style="font-family:'Cormorant Garamond',serif;color:#ff4d4d;margin-bottom:12px;font-size:28px;">Delete Account
+      </h2>
       <p style="color:#a0a0a0;font-size:14px;line-height:1.7;margin-bottom:24px;">This will permanently erase your
         account, all your configuration, usage history, and data. <strong style="color:#fff;">This cannot be
           undone.</strong></p>
@@ -2035,7 +2072,7 @@
           <div class="form-label"><span>OpenAI API Key</span><span class="form-badge">Required</span></div>
           <input type="password" id="openai_api_key" class="form-input" placeholder="sk-proj-..." />
           <div class="form-hint"><i>🤖</i><span>From <a href="https://platform.openai.com/api-keys"
-                target="_blank">platform.openai.com/api-keys</a> — powers GPT-4o &amp; Whisper.</span></div>
+                target="_blank">platform.openai.com/api-keys</a> </span></div>
         </div>
 
         <div class="alert alert-error" id="s1-err"></div>
@@ -2138,9 +2175,9 @@
           Operational</h2>
         <p style="color:var(--text-muted);line-height:1.8;margin-bottom:40px;">Sterling AI is now monitoring your
           WhatsApp endpoint. All systems are fully integrated and ready.</p>
-        <button class="btn btn-gold" onclick="window.location.href='/auth/status'">View Dashboard Telemetry</button>
+        <!-- <button class="btn btn-gold" onclick="window.location.href='/auth/status'">View Dashboard Telemetry</button>
 
-        Telemetry</button>
+        Telemetry</button> -->
       </div>
 
     </div>
@@ -2319,7 +2356,7 @@
         <div class="usage-card" id="card-tokens" style="cursor:default;">
           <div class="uc-label">OpenAI Tokens Used</div>
           <div class="uc-value" id="u-tokens">—</div>
-          <div class="uc-sub">GPT-4o total tokens consumed</div>
+          <div class="uc-sub"> total tokens consumed</div>
           <div class="usage-bar-wrap">
             <div class="usage-bar-bg">
               <div class="usage-bar-fill" id="u-tokens-bar" style="width:0%"></div>
@@ -2643,7 +2680,7 @@
           <div class="guide-section-icon">🤖</div>
           <div class="guide-section-meta">
             <h3>Step 5 — Get Your OpenAI API Key</h3>
-            <p>Power the brain behind Sterling AI — GPT-4o + Whisper</p>
+            <p>Power the brain behind Sterling AI </p>
           </div>
           <div class="guide-section-arrow">▾</div>
         </div>
@@ -2761,7 +2798,7 @@
 
     // ── Account Dropdown ──────────────────────────────────────────────────────
     function toggleAccountDropdown() {
-      const btn  = document.getElementById('acctBtn');
+      const btn = document.getElementById('acctBtn');
       const drop = document.getElementById('acctDropdown');
       const open = drop.classList.toggle('open');
       btn.classList.toggle('open', open);
@@ -2773,7 +2810,7 @@
     }
 
     // Close dropdown when clicking outside
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       const wrap = document.getElementById('acctWrap');
       if (wrap && !wrap.contains(e.target)) closeAccountDropdown();
     });
@@ -2796,7 +2833,7 @@
     }
 
     // Override so the X button works without an event argument
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
         document.getElementById('acctModalOverlay').classList.remove('open');
       }
@@ -2814,24 +2851,24 @@
     // ── Load profile from backend ─────────────────────────────────────────────
     async function loadProfile() {
       try {
-        const res  = await fetch('/account/profile');
+        const res = await fetch('/account/profile');
         const data = await res.json();
-        const email       = data.email || '';
+        const email = data.email || '';
         const displayName = data.display_name || '';
 
         // Fill modal
         document.getElementById('acctEmailDisplay').textContent = email || '—';
-        document.getElementById('acctDisplayName').value        = displayName;
+        document.getElementById('acctDisplayName').value = displayName;
 
         // Fill dropdown header
         document.getElementById('ddEmail').textContent = email;
         const name = displayName || email.split('@')[0] || 'Sterling User';
-        document.getElementById('ddName').textContent  = name;
+        document.getElementById('ddName').textContent = name;
 
         // Update nav button label & avatar initial
         document.getElementById('acctBtnLabel').textContent = displayName || 'Account';
-        document.getElementById('acctAvatar').textContent   = (displayName || email || 'S')[0].toUpperCase();
-      } catch(e) {
+        document.getElementById('acctAvatar').textContent = (displayName || email || 'S')[0].toUpperCase();
+      } catch (e) {
         console.warn('Profile load failed:', e);
       }
     }
@@ -2851,12 +2888,12 @@
           // Refresh dropdown header live
           const label = name || 'Account';
           document.getElementById('acctBtnLabel').textContent = label;
-          document.getElementById('ddName').textContent       = name || document.getElementById('ddEmail').textContent.split('@')[0];
-          document.getElementById('acctAvatar').textContent   = (label)[0].toUpperCase();
+          document.getElementById('ddName').textContent = name || document.getElementById('ddEmail').textContent.split('@')[0];
+          document.getElementById('acctAvatar').textContent = (label)[0].toUpperCase();
         } else {
           showAcctMsg('nameMsg', d.error || 'Failed to save.', 'error');
         }
-      } catch(e) {
+      } catch (e) {
         showAcctMsg('nameMsg', 'Network error. Try again.', 'error');
       }
     }
@@ -2881,11 +2918,11 @@
         if (d.ok) {
           showAcctMsg('pwMsg', '✓ Password updated successfully!', 'success');
           document.getElementById('acctCurrPw').value = '';
-          document.getElementById('acctNewPw').value  = '';
+          document.getElementById('acctNewPw').value = '';
         } else {
           showAcctMsg('pwMsg', d.error || 'Failed to update password.', 'error');
         }
-      } catch(e) {
+      } catch (e) {
         showAcctMsg('pwMsg', 'Network error. Try again.', 'error');
       }
     }
@@ -3292,9 +3329,9 @@
         const totalMins = onlineMins + offlineMins;
         const ffCostNote = totalMins <= 800 ? 'Free tier (≤800 mins/mo)' : 'Over free limit — check Fireflies plan';
         document.getElementById('cost-table-body').innerHTML = `
-          <tr><td>GPT-4o (Input)</td><td>${tokens.toLocaleString()} tokens</td><td>$0.005/1K</td><td class="gold">$${(tokens / 1000 * 0.005).toFixed(4)}</td></tr>
-          <tr><td>GPT-4o (Output est.)</td><td>~30% of tokens</td><td>$0.015/1K</td><td class="gold">$${(tokens * 0.3 / 1000 * 0.015).toFixed(4)}</td></tr>
-          <tr><td>Whisper (Voice)</td><td>${offlineMins.toFixed(1)} mins</td><td>$0.006/min</td><td class="gold">$${(offlineMins * 0.006).toFixed(4)}</td></tr>
+          <tr><td>Input</td><td>${tokens.toLocaleString()} tokens</td><td>$0.005/1K</td><td class="gold">$${(tokens / 1000 * 0.005).toFixed(4)}</td></tr>
+          <tr><td>Output est.</td><td>~30% of tokens</td><td>$0.015/1K</td><td class="gold">$${(tokens * 0.3 / 1000 * 0.015).toFixed(4)}</td></tr>
+          <tr><td> Voice </td><td>${offlineMins.toFixed(1)} mins</td><td>$0.006/min</td><td class="gold">$${(offlineMins * 0.006).toFixed(4)}</td></tr>
           <tr><td>Fireflies.ai</td><td>${totalMins.toFixed(1)} meeting mins</td><td>Free/Pro plan</td><td class="gold">${ffCostNote}</td></tr>
           <tr style="background:rgba(212,175,55,0.05);"><td><strong>Total Estimated</strong></td><td></td><td></td><td class="gold"><strong>$${costUsd.toFixed(4)} ≈ ₹${costInr}</strong></td></tr>`;
       } catch (e) {
