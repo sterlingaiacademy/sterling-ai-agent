@@ -824,6 +824,68 @@ async def reset_password_post(request: Request):
     return RedirectResponse("/login?error=Password+reset+successful.+Please+sign+in.", status_code=302)
 
 
+# ── Account profile (GET: fetch, POST: update display name) ──────────────────
+@router.get("/account/profile")
+async def get_profile(request: Request):
+    client_id = request.session.get("client_id")
+    email     = request.session.get("client_email")
+    if not client_id:
+        from fastapi.responses import JSONResponse
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+    try:
+        from agent.database import supabase as _db
+        from fastapi.responses import JSONResponse
+        result = _db.table("clients").select("email, display_name").eq("id", client_id).execute()
+        row = result.data[0] if result.data else {}
+        return JSONResponse({"email": row.get("email", email), "display_name": row.get("display_name", "")})
+    except Exception as e:
+        from fastapi.responses import JSONResponse
+        return JSONResponse({"email": email, "display_name": ""})
+
+@router.post("/account/profile")
+async def update_profile(request: Request):
+    from fastapi.responses import JSONResponse
+    client_id = request.session.get("client_id")
+    if not client_id:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+    try:
+        body = await request.json()
+        display_name = (body.get("display_name") or "").strip()[:80]
+        from agent.database import supabase as _db
+        _db.table("clients").update({"display_name": display_name}).eq("id", client_id).execute()
+        return JSONResponse({"ok": True})
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+# ── Change password (from inside the dashboard) ───────────────────────────────
+@router.post("/account/change-password")
+async def change_password(request: Request):
+    from fastapi.responses import JSONResponse
+    client_id = request.session.get("client_id")
+    email     = request.session.get("client_email")
+    if not client_id:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+    try:
+        body        = await request.json()
+        current_pw  = body.get("current_password", "")
+        new_pw      = body.get("new_password", "")
+        if len(new_pw) < 8:
+            return JSONResponse({"error": "New password must be at least 8 characters."}, status_code=400)
+        from agent.database import supabase as _db
+        result = _db.table("clients").select("password_hash").eq("id", client_id).execute()
+        if not result.data:
+            return JSONResponse({"error": "User not found."}, status_code=404)
+        stored_hash = result.data[0]["password_hash"]
+        if not bcrypt.checkpw(current_pw.encode(), stored_hash.encode()):
+            return JSONResponse({"error": "Current password is incorrect."}, status_code=400)
+        new_hash = bcrypt.hashpw(new_pw.encode(), bcrypt.gensalt()).decode()
+        _db.table("clients").update({"password_hash": new_hash}).eq("id", client_id).execute()
+        return JSONResponse({"ok": True})
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
 # ── Delete account permanently ────────────────────────────────────────────────
 @router.post("/account/delete")
 async def delete_account(request: Request):

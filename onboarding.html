@@ -139,24 +139,293 @@
       box-shadow: 0 0 15px rgba(212, 175, 55, 0.05);
     }
 
-    .nav-out {
-      padding: 8px 18px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      color: rgba(255, 100, 100, 0.8);
-      cursor: pointer;
-      border: 1px solid transparent;
-      background: none;
-      text-decoration: none;
-      transition: 0.3s;
+    /* ACCOUNT DROPDOWN */
+    .nav-account-wrap {
+      position: relative;
     }
 
-    .nav-out:hover {
-      background: rgba(255, 100, 100, 0.1);
-      color: #ff6b6b;
-      border-color: rgba(255, 100, 100, 0.2);
+    .nav-account-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gold);
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: rgba(212, 175, 55, 0.06);
+      transition: all 0.25s;
     }
+
+    .nav-account-btn:hover {
+      background: rgba(212, 175, 55, 0.14);
+      border-color: var(--border-glow);
+      box-shadow: 0 0 12px var(--gold-glow);
+    }
+
+    .nav-account-btn .acct-avatar {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: #000;
+    }
+
+    .nav-account-btn .acct-caret {
+      font-size: 10px;
+      opacity: 0.6;
+      transition: transform 0.2s;
+    }
+
+    .nav-account-btn.open .acct-caret {
+      transform: rotate(180deg);
+    }
+
+    .nav-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      min-width: 240px;
+      background: rgba(14, 14, 18, 0.96);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,175,55,0.05);
+      backdrop-filter: blur(20px);
+      overflow: hidden;
+      z-index: 999;
+      animation: dropIn 0.18s ease;
+    }
+
+    @keyframes dropIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .nav-dropdown.open {
+      display: block;
+    }
+
+    .dd-header {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dd-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+
+    .dd-email {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .dd-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .dd-item:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .dd-item .dd-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .dd-item.danger { color: #ff6b6b; }
+    .dd-item.danger:hover { background: rgba(255,77,77,0.08); }
+    .dd-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+    /* ACCOUNT SETTINGS MODAL */
+    .acct-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .acct-modal-overlay.open {
+      display: flex;
+    }
+
+    .acct-modal {
+      background: #0f0f12;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 0;
+      max-width: 480px;
+      width: 94%;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,175,55,0.08);
+      overflow: hidden;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .acct-modal-header {
+      padding: 28px 32px 22px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(212,175,55,0.06), transparent);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .acct-modal-header h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      color: var(--gold);
+    }
+
+    .acct-modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 22px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .acct-modal-close:hover { background: rgba(255,255,255,0.07); color: #fff; }
+
+    .acct-modal-body {
+      padding: 28px 32px 32px;
+    }
+
+    .acct-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin: 20px 0 12px;
+    }
+
+    .acct-section-title:first-child { margin-top: 0; }
+
+    .acct-info-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .acct-info-row .acct-info-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      min-width: 60px;
+    }
+
+    .acct-info-row .acct-info-val {
+      font-size: 14px;
+      color: var(--text-main);
+      flex: 1;
+    }
+
+    .acct-input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .acct-input {
+      flex: 1;
+      padding: 12px 14px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.25s;
+    }
+
+    .acct-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px rgba(212,175,55,0.15);
+      background: rgba(0,0,0,0.4);
+    }
+
+    .acct-btn {
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.25s;
+      white-space: nowrap;
+    }
+
+    .acct-btn-gold {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+      color: #000;
+    }
+
+    .acct-btn-gold:hover {
+      box-shadow: 0 4px 16px var(--gold-glow);
+      transform: translateY(-1px);
+    }
+
+    .acct-btn-danger {
+      background: rgba(255,77,77,0.1);
+      color: #ff6b6b;
+      border: 1px solid rgba(255,77,77,0.25);
+      width: 100%;
+      margin-top: 6px;
+    }
+
+    .acct-btn-danger:hover { background: rgba(255,77,77,0.18); }
+
+    .acct-msg {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .acct-msg.success { background: var(--success-bg); color: #4caf50; border: 1px solid rgba(76,175,80,0.25); }
+    .acct-msg.error   { background: var(--error-bg);   color: #ff6b6b; border: 1px solid rgba(255,77,77,0.25); }
 
     /* MOBILE MENU TOGGLE */
     .menu-toggle {
@@ -1581,22 +1850,81 @@
       <button class="nav-link" onclick="showPage('pricing', this)">Pricing</button>
       <button class="nav-link" onclick="showPage('usage', this)">Usage</button>
       <button class="nav-link" onclick="showPage('guide', this)">Guide</button>
-      <a href="/logout" class="nav-out">Sign Out</a>
-      <button class="nav-out" onclick="openDeleteModal()"
-        style="background:none;border:none;cursor:pointer;color:#ff4d4d;font-size:13px;font-weight:600;padding:8px 16px;border-radius:20px;border:1px solid rgba(255,77,77,0.3);margin-left:8px;transition:all .2s;"
-        onmouseover="this.style.background='rgba(255,77,77,0.1)'" onmouseout="this.style.background='none'">Delete
-        Account</button>
+
+      <!-- Account Dropdown -->
+      <div class="nav-account-wrap" id="acctWrap">
+        <button class="nav-account-btn" id="acctBtn" onclick="toggleAccountDropdown()">
+          <div class="acct-avatar" id="acctAvatar">S</div>
+          <span id="acctBtnLabel">Account</span>
+          <span class="acct-caret">▼</span>
+        </button>
+        <div class="nav-dropdown" id="acctDropdown">
+          <div class="dd-header">
+            <div class="dd-name" id="ddName">Sterling User</div>
+            <div class="dd-email" id="ddEmail">Loading…</div>
+          </div>
+          <button class="dd-item" onclick="openAccountModal()">
+            <div class="dd-icon" style="background:rgba(212,175,55,0.1);">⚙️</div>
+            Account Settings
+          </button>
+          <div class="dd-divider"></div>
+          <a class="dd-item" href="/logout">
+            <div class="dd-icon" style="background:rgba(255,255,255,0.05);">🚪</div>
+            Sign Out
+          </a>
+          <button class="dd-item danger" onclick="closeAccountDropdown(); openDeleteModal();">
+            <div class="dd-icon" style="background:rgba(255,77,77,0.1);">🗑️</div>
+            Delete Account
+          </button>
+        </div>
+      </div>
     </div>
   </nav>
 
+  <!-- ── Account Settings Modal ───────────────────────────────────────────── -->
+  <div class="acct-modal-overlay" id="acctModalOverlay" onclick="closeAccountModal(event)">
+    <div class="acct-modal">
+      <div class="acct-modal-header">
+        <h2>Account Settings</h2>
+        <button class="acct-modal-close" onclick="closeAccountModal()">✕</button>
+      </div>
+      <div class="acct-modal-body">
+
+        <!-- Profile Info -->
+        <div class="acct-section-title">Profile</div>
+        <div class="acct-info-row">
+          <span class="acct-info-label">📧 Email</span>
+          <span class="acct-info-val" id="acctEmailDisplay">—</span>
+        </div>
+        <div class="acct-input-group">
+          <input class="acct-input" id="acctDisplayName" type="text" placeholder="Your display name (e.g. Rasha)" maxlength="80" />
+          <button class="acct-btn acct-btn-gold" onclick="saveDisplayName()">Save</button>
+        </div>
+        <div class="acct-msg" id="nameMsg"></div>
+
+        <!-- Change Password -->
+        <div class="acct-section-title">Change Password</div>
+        <input class="acct-input" id="acctCurrPw" type="password" placeholder="Current password" style="margin-bottom:10px;" />
+        <div class="acct-input-group">
+          <input class="acct-input" id="acctNewPw" type="password" placeholder="New password (min 8 chars)" />
+          <button class="acct-btn acct-btn-gold" onclick="savePassword()">Update</button>
+        </div>
+        <div class="acct-msg" id="pwMsg"></div>
+
+        <!-- Danger Zone -->
+        <div class="acct-section-title" style="color:rgba(255,100,100,0.6);margin-top:28px;">Danger Zone</div>
+        <button class="acct-btn acct-btn-danger" onclick="closeAccountModal(); openDeleteModal();">🗑️ Permanently Delete Account</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Delete Account Modal -->
   <div id="delete-modal"
-    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:none;align-items:center;justify-content:center;">
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10000;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
     <div
-      style="background:#111;border:1px solid rgba(255,77,77,0.4);border-radius:20px;padding:40px;max-width:420px;width:90%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.6);">
-      <div style="font-size:40px;margin-bottom:16px;">⚠️</div>
-      <h2 style="font-family:'Cormorant Garamond',serif;color:#ff4d4d;margin-bottom:12px;font-size:26px;">Delete Account
-      </h2>
+      style="background:#0f0f12;border:1px solid rgba(255,77,77,0.35);border-radius:24px;padding:40px;max-width:420px;width:90%;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,0.7);">
+      <div style="font-size:42px;margin-bottom:16px;">⚠️</div>
+      <h2 style="font-family:'Cormorant Garamond',serif;color:#ff4d4d;margin-bottom:12px;font-size:28px;">Delete Account</h2>
       <p style="color:#a0a0a0;font-size:14px;line-height:1.7;margin-bottom:24px;">This will permanently erase your
         account, all your configuration, usage history, and data. <strong style="color:#fff;">This cannot be
           undone.</strong></p>
@@ -2427,6 +2755,137 @@
       document.getElementById('navMenu').classList.toggle('show');
     }
 
+    // ── Account Dropdown ──────────────────────────────────────────────────────
+    function toggleAccountDropdown() {
+      const btn  = document.getElementById('acctBtn');
+      const drop = document.getElementById('acctDropdown');
+      const open = drop.classList.toggle('open');
+      btn.classList.toggle('open', open);
+    }
+
+    function closeAccountDropdown() {
+      document.getElementById('acctDropdown').classList.remove('open');
+      document.getElementById('acctBtn').classList.remove('open');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      const wrap = document.getElementById('acctWrap');
+      if (wrap && !wrap.contains(e.target)) closeAccountDropdown();
+    });
+
+    // ── Account Settings Modal ────────────────────────────────────────────────
+    function openAccountModal() {
+      closeAccountDropdown();
+      document.getElementById('acctModalOverlay').classList.add('open');
+      // clear any previous messages
+      showAcctMsg('nameMsg', '', '');
+      showAcctMsg('pwMsg', '', '');
+      document.getElementById('acctCurrPw').value = '';
+      document.getElementById('acctNewPw').value = '';
+      loadProfile();
+    }
+
+    function closeAccountModal(e) {
+      if (e && e.target !== document.getElementById('acctModalOverlay')) return;
+      document.getElementById('acctModalOverlay').classList.remove('open');
+    }
+
+    // Override so the X button works without an event argument
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.getElementById('acctModalOverlay').classList.remove('open');
+      }
+    });
+
+    function showAcctMsg(id, text, type) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (!text) { el.style.display = 'none'; el.textContent = ''; return; }
+      el.textContent = text;
+      el.className = 'acct-msg ' + type;
+      el.style.display = 'block';
+    }
+
+    // ── Load profile from backend ─────────────────────────────────────────────
+    async function loadProfile() {
+      try {
+        const res  = await fetch('/account/profile');
+        const data = await res.json();
+        const email       = data.email || '';
+        const displayName = data.display_name || '';
+
+        // Fill modal
+        document.getElementById('acctEmailDisplay').textContent = email || '—';
+        document.getElementById('acctDisplayName').value        = displayName;
+
+        // Fill dropdown header
+        document.getElementById('ddEmail').textContent = email;
+        const name = displayName || email.split('@')[0] || 'Sterling User';
+        document.getElementById('ddName').textContent  = name;
+
+        // Update nav button label & avatar initial
+        document.getElementById('acctBtnLabel').textContent = displayName || 'Account';
+        document.getElementById('acctAvatar').textContent   = (displayName || email || 'S')[0].toUpperCase();
+      } catch(e) {
+        console.warn('Profile load failed:', e);
+      }
+    }
+
+    // ── Save display name ─────────────────────────────────────────────────────
+    async function saveDisplayName() {
+      const name = document.getElementById('acctDisplayName').value.trim();
+      try {
+        const res = await fetch('/account/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ display_name: name })
+        });
+        const d = await res.json();
+        if (d.ok) {
+          showAcctMsg('nameMsg', '✓ Display name saved!', 'success');
+          // Refresh dropdown header live
+          const label = name || 'Account';
+          document.getElementById('acctBtnLabel').textContent = label;
+          document.getElementById('ddName').textContent       = name || document.getElementById('ddEmail').textContent.split('@')[0];
+          document.getElementById('acctAvatar').textContent   = (label)[0].toUpperCase();
+        } else {
+          showAcctMsg('nameMsg', d.error || 'Failed to save.', 'error');
+        }
+      } catch(e) {
+        showAcctMsg('nameMsg', 'Network error. Try again.', 'error');
+      }
+    }
+
+    // ── Change password ───────────────────────────────────────────────────────
+    async function savePassword() {
+      const curr = document.getElementById('acctCurrPw').value;
+      const next = document.getElementById('acctNewPw').value;
+      if (!curr || !next) {
+        showAcctMsg('pwMsg', 'Please fill in both password fields.', 'error'); return;
+      }
+      if (next.length < 8) {
+        showAcctMsg('pwMsg', 'New password must be at least 8 characters.', 'error'); return;
+      }
+      try {
+        const res = await fetch('/account/change-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ current_password: curr, new_password: next })
+        });
+        const d = await res.json();
+        if (d.ok) {
+          showAcctMsg('pwMsg', '✓ Password updated successfully!', 'success');
+          document.getElementById('acctCurrPw').value = '';
+          document.getElementById('acctNewPw').value  = '';
+        } else {
+          showAcctMsg('pwMsg', d.error || 'Failed to update password.', 'error');
+        }
+      } catch(e) {
+        showAcctMsg('pwMsg', 'Network error. Try again.', 'error');
+      }
+    }
+
     function openDeleteModal() {
       const m = document.getElementById('delete-modal');
       m.style.display = 'flex';
@@ -2840,6 +3299,9 @@
     }
 
     window.onload = async function () {
+      // Load profile into nav button on page load
+      await loadProfile();
+
       // Check Google connection from backend (works after refresh too)
       await checkGoogleStatus();
 
