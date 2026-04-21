@@ -491,4 +491,5 @@ async def execute_tool(name: str, args: dict, client_data: dict, phone: str):
         return await get_transcript_detail(client_data=client_data, **args)
 
     elif name == "search_web":
-        return await search_web(**args)
+        openai_key = client_data.get("openai_api_key") or os.getenv("OPENAI_API_KEY")
+        return await search_web(api_key=openai_key, **args)
